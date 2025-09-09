@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>ENLAZADOS - Noticias y Actualidad</title>
+    <link rel="icon" href="img/favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300;0,400;0,700;1,400&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <aside class="menu-lateral" id="menu-lateral">
+        <h2>Menú</h2>
+        <nav>
+            <ul>
+                <li><a href="#">Inicio</a></li>
+                <li><a href="#">Notas Principales</a></li>
+                <li><a href="#">Notas Secundarias</a></li>
+                <li><a href="#">Sobre Nosotros</a></li>
+            </ul>
+        </nav>
+    </aside>
+
+    <header>
+        <div class="barra-titulo">
+            <div class="logo-container" id="btn-menu">
+                <img src="img/Logo.jpg" alt="Logo de ENLAZADOS" class="logo-img">
+                <div class="menu-icon">
+                    <div class="bar"></div>
+                    <div class="bar"></div>
+                    <div class="bar"></div>
+                </div>
+            </div>
+            <h1>ENLAZADOS</h1>
+            <div class="meta">
+                <p class="fecha"></p>
+                <p class="frase"></p>
+            </div>
+        </div>
+        <p>Enlazados: Contigo, con el sur de Tamaulipas.</p>
+    </header>
+
+   <main>
+        <div id="loader" class="loader-container">
+            <div class="spinner"></div>
+        </div>
+        
+        <section class="seccion-destacada"></section>
+        <section class="seccion-grid"></section>
+    </main>
+
+    <button id="back-to-top-btn" title="Volver arriba">▲</button>
+    
+    <footer>
+        <p>&copy; 2025 ENLAZADOS. Todos los derechos reservados.</p>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
