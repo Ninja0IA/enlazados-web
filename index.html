@@ -15,7 +15,7 @@
         <h2>Menú</h2>
         <nav>
             <ul>
-                <li><a href="#">Inicio</a></li>
+                <li><a href="#" id="btn-inicio-menu">Inicio</a></li>
                 <li><a href="#">Notas Principales</a></li>
                 <li><a href="#">Notas Secundarias</a></li>
                 <li><a href="#">Sobre Nosotros</a></li>
@@ -42,7 +42,7 @@
         <p>Enlazados: Contigo, con el sur de Tamaulipas.</p>
     </header>
 
-   <main>
+    <main>
         <div id="loader" class="loader-container">
             <div class="spinner"></div>
         </div>
@@ -50,6 +50,14 @@
         <section class="seccion-destacada"></section>
         <section class="seccion-grid"></section>
     </main>
+
+    <section id="vista-articulo" class="hidden">
+        <div class="articulo-completo-container">
+            <button id="btn-volver" class="btn-volver">← Volver a las noticias</button>
+            <div id="articulo-contenido">
+                </div>
+        </div>
+    </section>
 
     <button id="back-to-top-btn" title="Volver arriba">▲</button>
     

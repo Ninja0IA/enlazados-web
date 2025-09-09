@@ -20,7 +20,7 @@ body {
   background-color: #E1F5FE;
   color: #212121;
   padding: 20px;
-  padding-top: 120px; /* Aumentamos el padding para la barra más alta */
+  padding-top: 120px;
 }
 
 /* Estilos del HEADER */
@@ -49,12 +49,12 @@ header p {
   width: 100%;
   background-color: rgba(255, 255, 255, 0.98);
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-  padding: 10px 25px; /* Aumentamos padding lateral */
+  padding: 10px 25px;
   z-index: 1000;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  min-height: 100px; /* Altura mínima para acomodar el logo grande */
+  min-height: 100px;
 }
 
 /* Estilo para el título principal dentro de la barra. */
@@ -143,65 +143,153 @@ header p {
   font-style: italic;
 }
 
-/* ... (el resto del código sigue igual hasta la sección de Media Queries) ... */
-.articulo-destacado, .articulo-grid { cursor: pointer; opacity: 0; transform: translateY(20px); transition: opacity 0.6s ease-out, transform 0.6s ease-out, box-shadow 0.2s ease-out; }
-.articulo-destacado:hover, .articulo-grid:hover { transform: translateY(-8px); box-shadow: 0 10px 25px rgba(29, 66, 137, 0.2); }
-.menu-lateral { position: fixed; top: 0; left: -250px; width: 250px; height: 100vh; background-color: #1D4289; color: #FFFFFF; padding: 20px; padding-top: 100px; z-index: 1100; transition: left 0.4s ease-in-out; box-shadow: 2px 0 5px rgba(0,0,0,0.3); }
-.menu-lateral h2 { font-family: 'Playfair Display', serif; font-size: 2rem; text-align: center; margin-bottom: 25px; padding-bottom: 10px; border-bottom: 1px solid rgba(255, 255, 255, 0.2); color: #FFFFFF; }
-.menu-lateral.visible { left: 0; }
+/* Estilos de las notas (artículos) */
+.articulo-destacado, .articulo-grid {
+  cursor: pointer;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.6s ease-out, transform 0.6s ease-out, box-shadow 0.2s ease-out;
+}
+.articulo-destacado:hover, .articulo-grid:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 10px 25px rgba(29, 66, 137, 0.2);
+}
+
+/* MENÚ LATERAL DESPLEGABLE */
+.menu-lateral {
+  position: fixed;
+  top: 0;
+  left: -250px;
+  width: 250px;
+  height: 100vh;
+  background-color: #1D4289;
+  color: #FFFFFF;
+  padding: 20px;
+  padding-top: 100px;
+  z-index: 1100;
+  transition: left 0.4s ease-in-out;
+  box-shadow: 2px 0 5px rgba(0,0,0,0.3);
+}
+.menu-lateral h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    text-align: center;
+    margin-bottom: 25px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    color: #FFFFFF;
+}
+.menu-lateral.visible {
+  left: 0;
+}
 .menu-lateral nav ul { list-style: none; padding: 0; }
 .menu-lateral nav ul li { margin-bottom: 20px; }
-.menu-lateral nav ul li a { text-decoration: none; color: #FFFFFF; font-size: 1.1rem; font-family: 'Open Sans', Arial, sans-serif; transition: color 0.3s; }
+.menu-lateral nav ul li a {
+  text-decoration: none;
+  color: #FFFFFF;
+  font-size: 1.1rem;
+  font-family: 'Open Sans', Arial, sans-serif;
+  transition: color 0.3s;
+}
 .menu-lateral nav ul li a:hover { color: #69B3E7; }
-footer { width: 100%; text-align: center; margin-top: 50px; padding: 20px; background-color: #1D4289; color: #FFFFFF; font-size: 0.9rem; border-radius: 10px; }
+
+/* FOOTER */
+footer {
+  width: 100%;
+  text-align: center;
+  margin-top: 50px;
+  padding: 20px;
+  background-color: #1D4289;
+  color: #FFFFFF;
+  font-size: 0.9rem;
+  border-radius: 10px;
+}
+
+/* Contenedor principal */
 main { display: flex; flex-wrap: wrap; gap: 30px; }
+
+/* LÓGICA DE DESPLAZAMIENTO */
 .barra-titulo, main, footer { transition: margin-left 0.4s ease-in-out, width 0.4s ease-in-out; }
 .desplazado { margin-left: 250px; }
 .barra-titulo.desplazado { width: calc(100% - 250px); }
+
+/* LAYOUT NOTICIAS PRINCIPAL */
 .seccion-destacada { margin-bottom: 40px; }
-.articulo-destacado { display: flex; gap: 25px; background-color: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 6px 15px rgba(0,0,0,0.08); border: 1px solid #d4eaf7; }
+.articulo-destacado {
+  display: flex;
+  gap: 25px;
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 6px 15px rgba(0,0,0,0.08);
+  border: 1px solid #d4eaf7;
+}
 .articulo-destacado .imagen-container { flex: 1; }
 .articulo-destacado img { width: 100%; height: 100%; object-fit: cover; border-radius: 8px; }
 .articulo-destacado .contenido-container { flex: 1; display: flex; flex-direction: column; justify-content: center; }
 .articulo-destacado h2 { font-size: 2.5rem; }
 .seccion-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px; }
-.articulo-grid { background-color: #fff; border-radius: 10px; box-shadow: 0 6px 15px rgba(0,0,0,0.08); border: 1px solid #d4eaf7; overflow: hidden; display: flex; flex-direction: column; }
+.articulo-grid {
+  background-color: #fff;
+  border-radius: 10px;
+  box-shadow: 0 6px 15px rgba(0,0,0,0.08);
+  border: 1px solid #d4eaf7;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
 .articulo-grid img { width: 100%; height: 200px; object-fit: cover; }
 .articulo-grid .contenido-container { padding: 20px; }
 .articulo-grid h3 { font-size: 1.3rem; }
 
-/* ===============================================================
-   DISEÑO RESPONSIVO (ADAPTABLE A MÓVILES Y TABLETS)
-   =============================================================== */
-
-/* Para pantallas medianas (hasta 1200px) */
-@media (max-width: 1200px) {
-    .barra-titulo h1 {
-        font-size: 3.5rem;
-    }
+/* --- ICONOS DE COMPARTIR (CORRECCIÓN) --- */
+.share-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 15px;
+    font-size: 0.9rem;
+    color: #555;
 }
 
-/* CAMBIO: Punto de quiebre para ocultar la meta-información */
+.share-icons {
+    display: flex;
+    gap: 10px;
+}
+
+.share-icons a {
+    display: inline-flex; /* Asegura que el SVG esté centrado si el 'a' es más grande */
+    align-items: center;
+    justify-content: center;
+    width: 24px; /* Tamaño fijo para los iconos */
+    height: 24px;
+    color: #1D4289; /* Color de los iconos */
+    transition: transform 0.2s ease;
+}
+
+.share-icons a:hover {
+    transform: translateY(-2px);
+}
+
+.share-icons svg {
+    width: 100%; /* El SVG ocupa todo el espacio del 'a' */
+    height: 100%;
+    fill: currentColor; /* Usa el color del padre (el 'a') */
+}
+
+
+/* DISEÑO RESPONSIVO */
+@media (max-width: 1200px) { .barra-titulo h1 { font-size: 3.5rem; } }
 @media (max-width: 992px) {
-    .barra-titulo h1 {
-        font-size: 3rem;
-    }
-    .meta {
-        display: none; /* LA REGLA CLAVE: Ocultamos la frase y fecha */
-    }
+    .barra-titulo h1 { font-size: 3rem; }
+    .meta { display: none; }
 }
-
-/* Para pantallas pequeñas / móviles */
 @media (max-width: 768px) {
   body { padding: 10px; padding-top: 100px; }
   .barra-titulo { gap: 10px; padding: 10px 15px; min-height: 80px; }
   .logo-container { width: 70px; height: 70px; }
   .menu-icon { width: 45px; height: 45px; }
-
-  .barra-titulo h1 {
-    font-size: 2.5rem;
-  }
-
+  .barra-titulo h1 { font-size: 2.5rem; }
   .articulo-destacado { flex-direction: column; }
   .articulo-destacado h2 { font-size: 1.8rem; }
   .seccion-grid { gap: 20px; }
@@ -209,18 +297,187 @@ main { display: flex; flex-wrap: wrap; gap: 30px; }
   footer.desplazado { width: calc(100% - 250px); }
 }
 
-/* ... (resto de los estilos: loader, share, back-to-top, etc.) ... */
+/* VISTA DE ARTÍCULO COMPLETO */
+.hidden { display: none; }
+#vista-articulo { width: 100%; padding: 20px; box-sizing: border-box; }
+.articulo-completo-container { max-width: 800px; margin: 0 auto; background-color: #fff; padding: 30px; border-radius: 10px; box-shadow: 0 6px 20px rgba(0,0,0,0.1); }
+.btn-volver { background: none; border: none; color: #1D4289; font-family: 'Open Sans', sans-serif; font-size: 1rem; font-weight: 700; cursor: pointer; margin-bottom: 25px; transition: opacity 0.2s; }
+.btn-volver:hover { opacity: 0.7; }
+#articulo-contenido h2 { font-family: 'Playfair Display', serif; font-size: 3rem; color: #1D4289; margin-bottom: 15px; }
+#articulo-contenido .metadata-articulo { font-size: 0.9rem; color: #555; margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px solid #eee; display: flex; gap: 20px; align-items: center; }
+#articulo-contenido img { width: 100%; height: auto; border-radius: 8px; margin-bottom: 25px; }
+#articulo-contenido p { font-size: 1.1rem; line-height: 1.8; color: #212121; }
+
+/* SECCIÓN DE NOTAS RELACIONADAS */
+.notas-relacionadas { margin-top: 40px; padding-top: 30px; border-top: 2px solid #eee; }
+.notas-relacionadas h3 { font-family: 'Playfair Display', serif; font-size: 1.8rem; color: #1D4289; text-align: center; margin-bottom: 25px; }
+.grid-relacionadas { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; }
+.tarjeta-relacionada { background-color: #f9f9f9; border-radius: 8px; overflow: hidden; text-decoration: none; color: #212121; box-shadow: 0 4px 10px rgba(0,0,0,0.05); transition: transform 0.2s ease, box-shadow 0.2s ease; }
+.tarjeta-relacionada:hover { transform: translateY(-5px); box-shadow: 0 8px 15px rgba(0,0,0,0.1); }
+.tarjeta-relacionada img { width: 100%; height: 120px; object-fit: cover; }
+.tarjeta-relacionada h4 { font-family: 'Times New Roman', Times, serif; font-size: 1.1rem; padding: 15px; color: #1D4289; }
+
+/* ===============================================================
+   SECCIÓN DE COMENTARIOS Y PUNTUACIÓN (REDiseño y CORRECCIÓN)
+   =============================================================== */
+.interaccion-seccion {
+    margin-top: 40px;
+    padding-top: 30px;
+    border-top: 2px solid #eee;
+}
+
+.interaccion-seccion h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.8rem;
+    color: #1D4289;
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+/* --- Puntuación por estrellas (CORRECCIÓN DE DIRECCIÓN) --- */
+.puntuacion-seccion {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 40px;
+}
+
+.puntuacion-seccion .estrellas {
+    display: flex;
+    flex-direction: row; /* CORRECCIÓN: Ahora de izquierda a derecha */
+    justify-content: center;
+}
+
+.puntuacion-seccion .estrellas svg {
+    width: 28px;
+    height: 28px;
+    fill: #ccc;
+    cursor: pointer;
+    transition: transform 0.2s ease, fill 0.2s ease;
+}
+
+.puntuacion-seccion .estrellas svg:hover,
+.puntuacion-seccion .estrellas svg:hover ~ svg { /* CORRECCIÓN: Al pasar sobre una, las anteriores también se pintan */
+    fill: #ffc107;
+}
+
+
+/* --- Formulario de comentarios --- */
+.comentario-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-bottom: 40px;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.comentario-form textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-family: 'Open Sans', sans-serif;
+    font-size: 1rem;
+    min-height: 100px;
+    resize: vertical;
+}
+
+.comentario-form button {
+    align-self: flex-end;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    background-color: #1D4289;
+    color: white;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.comentario-form button:hover {
+    background-color: #69B3E7;
+}
+
+/* --- Muro de "Iniciar Sesión" --- */
+.login-wall {
+    text-align: center;
+    padding: 30px;
+    background-color: #f9f9f9;
+    border: 1px solid #eee;
+    border-radius: 8px;
+    max-width: 600px;
+    margin: 20px auto 40px auto;
+}
+
+.login-wall p {
+    margin-bottom: 15px !important;
+    font-size: 1rem !important;
+    line-height: 1.5 !important;
+}
+
+.login-wall button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    background-color: #1D4289;
+    color: white;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.login-wall button:hover {
+    background-color: #69B3E7;
+}
+
+/* --- Lista de comentarios --- */
+.lista-comentarios .comentario-item {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 25px;
+    padding-bottom: 25px;
+    border-bottom: 1px solid #eee;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.lista-comentarios .comentario-item:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+}
+
+.comentario-item .avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background-color: #eee;
+    text-align: center;
+    line-height: 50px;
+    font-weight: bold;
+    color: #333;
+    flex-shrink: 0;
+}
+
+.comentario-item .comentario-contenido .autor {
+    font-weight: 700;
+    margin-bottom: 5px;
+}
+
+.comentario-item .comentario-contenido .fecha {
+    font-size: 0.8rem;
+    color: #777;
+    margin-bottom: 10px;
+}
+
 .loader-container { display: flex; justify-content: center; align-items: center; width: 100%; height: 300px; }
 .spinner { border: 4px solid rgba(29, 66, 137, 0.1); border-left-color: #1D4289; border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; }
 @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-.share-container { margin-top: 20px; padding-top: 15px; border-top: 1px solid #e0e0e0; display: flex; align-items: center; gap: 15px; }
-.share-container span { font-size: 0.9rem; font-weight: 700; color: #555; }
-.share-icons a { display: inline-block; margin: 0 5px; transition: transform 0.2s ease; }
-.share-icons a:hover { transform: scale(1.15); }
-.share-icons svg { width: 24px; height: 24px; fill: #555; }
-.share-icons .twitter-share:hover svg { fill: #1DA1F2; }
-.share-icons .facebook-share:hover svg { fill: #1877F2; }
-.share-icons .whatsapp-share:hover svg { fill: #25D366; }
 #back-to-top-btn { position: fixed; bottom: 30px; right: 30px; opacity: 0; visibility: hidden; transform: scale(0); background-color: #1D4289; color: white; border: none; border-radius: 50%; width: 50px; height: 50px; font-size: 24px; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.2); transition: opacity 0.3s ease, visibility 0.3s ease, transform 0.3s ease; z-index: 1200; }
 #back-to-top-btn.visible { opacity: 1; visibility: visible; transform: scale(1); }
 #back-to-top-btn:hover { background-color: #69B3E7; }
