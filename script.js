@@ -16,26 +16,65 @@ document.addEventListener("DOMContentLoaded", function() {
     const footer = document.querySelector("footer");
     const backToTopBtn = document.getElementById("back-to-top-btn");
     const btnInicioMenu = document.getElementById("btn-inicio-menu");
+    const loginModal = document.getElementById("login-modal");
+    const modalCloseBtn = document.getElementById("modal-close-btn");
 
     let todasLasNotas = [];
-    
-    // ===== SIMULACIÓN DE INICIO DE SESIÓN =====
-    let usuarioEstaLogueado = false; // ¡Cambia a 'true' para ver el formulario de comentarios!
+    let usuarioEstaLogueado = false;
 
     /* ==================== 1. Generar y mostrar la fecha y la frase ==================== */
+    // ... (This section remains the same)
+
+    /* ==================== 2. Carga de Notas y Lógica Principal ==================== */
+    // ... (This section remains the same)
+
+    // --- FUNCIÓN PARA MOSTRAR SECCIÓN DE COMENTARIOS Y PUNTUACIÓN ---
+    function renderizarSeccionComentarios() {
+        // ... (This function remains mostly the same, but we update the event listener)
+        
+        // Find the "Iniciar Sesión" button if it exists
+        const btnLoginPopup = articleContent.querySelector('#btn-login-popup');
+        if (btnLoginPopup) {
+            btnLoginPopup.addEventListener('click', function() {
+                loginModal.classList.remove('hidden'); // Show the modal
+            });
+        }
+
+        // ... (The rest of the function remains the same)
+    }
+
+    /* ==================== 3. Lógica de Navegación y Menú ==================== */
+    // ... (This section remains the same)
+
+    /* ==================== 4. Lógica del Modal de Inicio de Sesión ==================== */
+    function cerrarModal() {
+        loginModal.classList.add('hidden');
+    }
+
+    modalCloseBtn.addEventListener('click', cerrarModal);
+
+    loginModal.addEventListener('click', function(event) {
+        // Close modal if the overlay is clicked, but not the content inside it
+        if (event.target === loginModal) {
+            cerrarModal();
+        }
+    });
+
+    /* ==================== 5. Lógica para el botón "Volver Arriba" ==================== */
+    // ... (This section remains the same)
+
+    // --- PASTE THE FULL SCRIPT HERE TO AVOID MISSING FUNCTIONS ---
+    // The following is the complete, final script
+    
+    // (Start of full script)
     const hoy = new Date();
     const opcionesFecha = { year: 'numeric', month: 'long', day: 'numeric' };
     fechaElemento.textContent = hoy.toLocaleString('es-ES', opcionesFecha);
     
-    const frases = [
-        "El único modo de hacer un gran trabajo es amar lo que haces.", "La vida es como una bicicleta, para mantener el equilibrio debes seguir moviéndote.", "El éxito no es la clave de la felicidad. La felicidad es la clave del éxito.",
-        "The future belongs to those who believe in the beauty of their dreams.", "The only impossible journey is the one you never begin.", "Believe you can and you're halfway there.",
-        "七転び八起き (Nanakorobi yaoki) - Cae siete veces, levántate ocho.", "継続は力なり (Keizoku wa chikara nari) - La perseverancia es poder.", "明日は明日の風が吹く (Ashita wa ashita no kaze ga fuku) - Mañana soplará el viento de mañana."
-    ];
+    const frases = [ "El único modo de hacer un gran trabajo es amar lo que haces.", "La vida es como una bicicleta, para mantener el equilibrio debes seguir moviéndote.", "El éxito no es la clave de la felicidad. La felicidad es la clave del éxito.", "The future belongs to those who believe in the beauty of their dreams.", "The only impossible journey is the one you never begin.", "Believe you can and you're halfway there.", "七転び八起き (Nanakorobi yaoki) - Cae siete veces, levántate ocho.", "継続は力なり (Keizoku wa chikara nari) - La perseverancia es poder.", "明日は明日の風が吹く (Ashita wa ashita no kaze ga fuku) - Mañana soplará el viento de mañana." ];
     const fraseAleatoria = frases[Math.floor(Math.random() * frases.length)];
     fraseElemento.textContent = `"${fraseAleatoria}"`;
 
-    /* ==================== 2. Carga de Notas y Lógica Principal ==================== */
     if (seccionDestacada && seccionGrid && loader) {
         fetch('notas.json')
             .then(response => response.json())
@@ -47,7 +86,6 @@ document.addEventListener("DOMContentLoaded", function() {
             .finally(() => { loader.style.display = 'none'; });
     }
 
-    // --- FUNCIÓN PARA RENDERIZAR LA PÁGINA PRINCIPAL ---
     function renderizarPaginaPrincipal() {
         const notaDestacada = todasLasNotas.find(nota => nota.tipo === 'destacada');
         const notasGrid = todasLasNotas.filter(nota => nota.tipo === 'grid');
@@ -58,7 +96,6 @@ document.addEventListener("DOMContentLoaded", function() {
         activarAnimacionScroll();
     }
 
-    // --- FUNCIÓN PARA CREAR UNA TARJETA DE NOTICIA ---
     function crearTarjeta(nota, esDestacada) {
         const link = document.createElement("a");
         link.href = `#articulo/${nota.id}`;
@@ -78,7 +115,6 @@ document.addEventListener("DOMContentLoaded", function() {
         return link;
     }
 
-    // --- FUNCIÓN PARA MOSTRAR UN ARTÍCULO COMPLETO ---
     function mostrarArticulo(id) {
         const nota = todasLasNotas.find(n => n.id === id);
         if (!nota) return;
@@ -91,7 +127,6 @@ document.addEventListener("DOMContentLoaded", function() {
         window.scrollTo(0, 0);
     }
     
-    // --- FUNCIÓN PARA MOSTRAR NOTAS RELACIONADAS ---
     function renderizarNotasRelacionadas(idArticuloActual) {
         const notasCandidatas = todasLasNotas.filter(n => n.id !== idArticuloActual);
         const notasMezcladas = notasCandidatas.sort(() => 0.5 - Math.random());
@@ -116,97 +151,48 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     }
 
-    // --- FUNCIÓN PARA MOSTRAR SECCIÓN DE COMENTARIOS Y PUNTUACIÓN ---
     function renderizarSeccionComentarios() {
         const interactionContainer = document.createElement('div');
         interactionContainer.className = 'interaccion-seccion';
         const starSVG = `<svg viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>`;
         let formularioComentariosHTML = '';
-
         if (usuarioEstaLogueado) {
             formularioComentariosHTML = `<h3>Deja tu comentario</h3><form class="comentario-form" id="form-comentario"><textarea placeholder="Escribe tu comentario aquí..." required></textarea><button type="submit">Enviar Comentario</button></form>`;
         } else {
             formularioComentariosHTML = `<div class="login-wall"><p>Debes iniciar sesión para poder puntuar o dejar un comentario.</p><button id="btn-login-popup">Iniciar Sesión / Registrarse</button></div>`;
         }
-
-        interactionContainer.innerHTML = `
-            <div class="puntuacion-seccion">
-                <h3>¡Puntúa esta nota!</h3>
-                <div class="estrellas" id="estrellas-rating">${starSVG.repeat(5)}</div>
-            </div>
-            <div class="comentarios-seccion">
-                ${formularioComentariosHTML}
-                <h3>Comentarios</h3>
-                <div class="lista-comentarios">
-                    <div class="comentario-item"><div class="avatar">U</div><div class="comentario-contenido"><p class="autor">Usuario de Ejemplo</p><p class="fecha">Hace 2 días</p><p>¡Qué gran artículo! Muy informativo y bien escrito.</p></div></div>
-                    <div class="comentario-item"><div class="avatar">L</div><div class="comentario-contenido"><p class="autor">Lector Anónimo</p><p class="fecha">Hace 1 día</p><p>No estoy de acuerdo con el segundo párrafo, pero el resto del análisis es excelente.</p></div></div>
-                </div>
-            </div>`;
+        interactionContainer.innerHTML = `<div class="puntuacion-seccion"><h3>¡Puntúa esta nota!</h3><div class="estrellas" id="estrellas-rating">${starSVG.repeat(5)}</div></div><div class="comentarios-seccion">${formularioComentariosHTML}<h3>Comentarios</h3><div class="lista-comentarios"><div class="comentario-item"><div class="avatar">U</div><div class="comentario-contenido"><p class="autor">Usuario de Ejemplo</p><p class="fecha">Hace 2 días</p><p>¡Qué gran artículo! Muy informativo y bien escrito.</p></div></div><div class="comentario-item"><div class="avatar">L</div><div class="comentario-contenido"><p class="autor">Lector Anónimo</p><p class="fecha">Hace 1 día</p><p>No estoy de acuerdo con el segundo párrafo, pero el resto del análisis es excelente.</p></div></div></div></div>`;
         articleContent.appendChild(interactionContainer);
-
-        if (usuarioEstaLogueado) {
-            interactionContainer.querySelector('#form-comentario').addEventListener('submit', function(e) { e.preventDefault(); alert('¡Gracias! Tu comentario ha sido enviado (simulación).'); this.reset(); });
-        } else {
-            interactionContainer.querySelector('#btn-login-popup').addEventListener('click', function() { alert('Aquí se abriría una ventana para iniciar sesión o registrarse.'); });
+        
+        const btnLoginPopup = interactionContainer.querySelector('#btn-login-popup');
+        if (btnLoginPopup) {
+            btnLoginPopup.addEventListener('click', function() {
+                loginModal.classList.remove('hidden');
+            });
+        }
+        
+        const formComentario = interactionContainer.querySelector('#form-comentario');
+        if (formComentario) {
+            formComentario.addEventListener('submit', function(e) { e.preventDefault(); alert('¡Gracias! Tu comentario ha sido enviado (simulación).'); this.reset(); });
         }
         
         interactionContainer.querySelectorAll('.estrellas svg').forEach(estrella => {
             estrella.addEventListener('click', function() {
-                if (!usuarioEstaLogueado) { alert('Necesitas iniciar sesión para poder puntuar.'); } 
+                if (!usuarioEstaLogueado) { loginModal.classList.remove('hidden'); } 
                 else { alert('¡Gracias por tu puntuación! (simulación)'); }
             });
         });
     }
     
-    // --- FUNCIONES AUXILIARES ---
-    function activarAnimacionScroll() {
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('visible');
-                    observer.unobserve(entry.target);
-                }
-            });
-        }, { threshold: 0.1 });
-        const articlesToObserve = document.querySelectorAll('.articulo-destacado, .articulo-grid');
-        articlesToObserve.forEach(article => observer.observe(article));
-    }
-    function calcularTiempoLectura(texto) {
-        const palabrasPorMinuto = 200;
-        const numeroDePalabras = texto.trim().split(/\s+/).length;
-        const minutos = Math.ceil(numeroDePalabras / palabrasPorMinuto);
-        return `Lectura de ${minutos} min`;
-    }
-
-    /* ==================== 3. Lógica de Navegación y Menú ==================== */
-    function regresarAPaginaPrincipal() {
-        articleView.classList.add('hidden');
-        mainView.classList.remove('hidden');
-        menuLateral.classList.remove('visible');
-        barraTitulo.classList.remove('desplazado');
-        mainView.classList.remove('desplazado');
-        footer.classList.remove('desplazado');
-    }
+    function activarAnimacionScroll() { const observer = new IntersectionObserver((entries) => { entries.forEach(entry => { if (entry.isIntersecting) { entry.target.classList.add('visible'); observer.unobserve(entry.target); } }); }, { threshold: 0.1 }); const articlesToObserve = document.querySelectorAll('.articulo-destacado, .articulo-grid'); articlesToObserve.forEach(article => observer.observe(article)); }
+    function calcularTiempoLectura(texto) { const palabrasPorMinuto = 200; const numeroDePalabras = texto.trim().split(/\s+/).length; const minutos = Math.ceil(numeroDePalabras / palabrasPorMinuto); return `Lectura de ${minutos} min`; }
     
-    btnMenu.addEventListener("click", function() {
-        menuLateral.classList.toggle("visible");
-        barraTitulo.classList.toggle("desplazado");
-        mainView.classList.toggle("desplazado");
-        footer.classList.toggle("desplazado");
-    });
+    function regresarAPaginaPrincipal() { articleView.classList.add('hidden'); mainView.classList.remove('hidden'); menuLateral.classList.remove('visible'); barraTitulo.classList.remove('desplazado'); mainView.classList.remove('desplazado'); footer.classList.remove('desplazado'); }
     
+    btnMenu.addEventListener("click", function() { menuLateral.classList.toggle("visible"); barraTitulo.classList.toggle("desplazado"); mainView.classList.toggle("desplazado"); footer.classList.toggle("desplazado"); });
     btnVolver.addEventListener('click', regresarAPaginaPrincipal);
-    btnInicioMenu.addEventListener('click', function(event) {
-        event.preventDefault();
-        regresarAPaginaPrincipal();
-    });
+    btnInicioMenu.addEventListener('click', function(event) { event.preventDefault(); regresarAPaginaPrincipal(); });
 
-    /* ==================== 4. Lógica para el botón "Volver Arriba" ==================== */
-    window.addEventListener("scroll", function() {
-        if (window.scrollY > 300) { backToTopBtn.classList.add("visible"); } 
-        else { backToTopBtn.classList.remove("visible"); }
-    });
-    backToTopBtn.addEventListener("click", function() {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    });
+    window.addEventListener("scroll", function() { if (window.scrollY > 300) { backToTopBtn.classList.add("visible"); } else { backToTopBtn.classList.remove("visible"); } });
+    backToTopBtn.addEventListener("click", function() { window.scrollTo({ top: 0, behavior: 'smooth' }); });
 });
