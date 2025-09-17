@@ -1,42 +1,58 @@
 [
     {
         "id": "1",
+        "fecha": "2025-09-16",
         "tipo": "destacada",
+        "prioridad": 1,
         "titulo": "ENTREVISTA EXCLUSIVA: La vida en la frontera galáctica",
         "cuerpo": "Hablamos con el Comandante Alex Ryder sobre los desafíos de mantener la paz en los sistemas exteriores, los primeros contactos y el futuro de la exploración espacial. Una mirada íntima a la vida de un héroe moderno.",
-        "imagen": "https://picsum.photos/id/15/800/500",
-        "altImagen": "Un astronauta mirando hacia un sistema estelar"
+        "media": [
+            { "tipo": "imagen", "url": "https://picsum.photos/id/15/1200/800", "alt": "Un astronauta mirando hacia un sistema estelar" }
+        ]
     },
     {
         "id": "2",
+        "fecha": "2025-09-15",
         "tipo": "grid",
+        "prioridad": 2,
         "titulo": "Avance tecnológico: Crean la primera batería que se carga con el aire",
         "cuerpo": "Un equipo de científicos ha desarrollado un prototipo funcional que podría revolucionar la industria de los dispositivos móviles y los vehículos eléctricos.",
-        "imagen": "https://picsum.photos/id/54/400/300",
-        "altImagen": "Placa de circuito con luces"
+        "media": [
+            { "tipo": "imagen", "url": "https://picsum.photos/id/54/400/300", "alt": "Placa de circuito con luces" }
+        ]
     },
     {
         "id": "3",
+        "fecha": "2025-09-14",
         "tipo": "grid",
+        "prioridad": 3,
         "titulo": "Descubrimiento submarino: Hallan una ciudad antigua en el Triángulo de las Bermudas",
         "cuerpo": "Las ruinas, que datan de hace más de 2,000 años, podrían reescribir la historia de la navegación en el Caribe y avivar los mitos de la región.",
-        "imagen": "https://picsum.photos/id/111/400/300",
-        "altImagen": "Buzo explorando ruinas submarinas"
+        "media": [
+            { "tipo": "imagen", "url": "https://picsum.photos/id/111/400/300", "alt": "Buzo explorando ruinas submarinas" }
+        ]
     },
     {
         "id": "4",
+        "fecha": "2025-09-13",
         "tipo": "grid",
+        "prioridad": 2,
         "titulo": "El futuro del cine: ¿Serán los efectos especiales indistinguibles de la realidad?",
         "cuerpo": "Directores y expertos en VFX debaten sobre el impacto de la IA y el 'render' en tiempo real en las próximas superproducciones de Hollywood.",
-        "imagen": "https://picsum.photos/id/177/400/300",
-        "altImagen": "Cámara de cine profesional"
+        "media": [
+            { "tipo": "imagen", "url": "https://picsum.photos/id/177/400/300", "alt": "Cámara de cine profesional" },
+            { "tipo": "imagen", "url": "https://picsum.photos/id/175/400/300", "alt": "Set de filmación con luces" }
+        ]
     },
     {
         "id": "5",
+        "fecha": "2025-09-12",
         "tipo": "grid",
+        "prioridad": 3,
         "titulo": "Gastronomía molecular revoluciona las cocinas de París",
         "cuerpo": "Nuevos chefs están llevando los sabores tradicionales a otro nivel, utilizando técnicas científicas para crear platos que desafían la vista y el paladar.",
-        "imagen": "https://picsum.photos/id/225/400/300",
-        "altImagen": "Plato de comida gourmet"
+        "media": [
+            { "tipo": "imagen", "url": "https://picsum.photos/id/225/400/300", "alt": "Plato de comida gourmet" }
+        ]
     }
 ]

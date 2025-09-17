@@ -15,6 +15,7 @@
         <h2>Menú</h2>
         <nav>
             <ul>
+                <li><a href="#" id="btn-login-menu">Iniciar Sesión</a></li>
                 <li><a href="#" id="btn-inicio-menu">Inicio</a></li>
                 <li><a href="#">Notas Principales</a></li>
                 <li><a href="#">Notas Secundarias</a></li>
@@ -46,7 +47,7 @@
         <div id="loader" class="loader-container">
             <div class="spinner"></div>
         </div>
-        
+        <p id="mensaje-sin-notas" class="hidden">Aún no hay notas publicadas. ¡Vuelve pronto!</p>
         <section class="seccion-destacada"></section>
         <section class="seccion-grid"></section>
     </main>
@@ -58,18 +59,15 @@
         </div>
     </section>
 
-    <div id="login-modal" class="modal-overlay hidden">
+    <div id="welcome-modal" class="modal-overlay hidden">
         <div class="modal-content">
-            <button class="modal-close" id="modal-close-btn">&times;</button>
-            <h2>Iniciar Sesión</h2>
-            <form id="login-form">
-                <label for="email">Correo Electrónico:</label>
-                <input type="email" id="email" name="email" required>
-                <label for="password">Contraseña:</label>
-                <input type="password" id="password" name="password" required>
-                <button type="submit">Entrar</button>
-            </form>
-            <p class="modal-switch">¿No tienes una cuenta? <a href="#" id="show-register">Regístrate</a></p>
+            <button class="modal-close" id="welcome-modal-close-btn">&times;</button>
+            <h2>Bienvenido a ENLAZADOS</h2>
+            <p>Inicia sesión para comentar y puntuar, o explora el sitio como anónimo.</p>
+            <div class="welcome-modal-actions">
+                <button id="btn-login-welcome">Iniciar Sesión con Google</button>
+                <button id="btn-anonimo" class="btn-secundario">Continuar como Anónimo</button>
+            </div>
         </div>
     </div>
 
