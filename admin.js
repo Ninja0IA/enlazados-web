@@ -1,7 +1,8 @@
 // Importamos las funciones que necesitamos de Firebase
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { getFirestore, collection, addDoc, serverTimestamp, query, where, getDocs, orderBy, doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getFirestore, collection, addDoc, serverTimestamp, query, where, getDocs, orderBy, doc, updateDoc, deleteDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 
 // Tu configuración de Firebase
 const firebaseConfig = {
@@ -18,18 +19,47 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
+const storage = getStorage(app);
 
-// ==================== LÓGICA DE SEGURIDAD Y DEL PANEL ====================
-
-const adminEmail = "angelmaya.180204@gmail.com"; 
-
+// ==================== LÓGICA DEL PANEL DE ADMINISTRADOR ====================
 const loader = document.getElementById('loader');
 const adminContent = document.getElementById('admin-content');
 const btnLogout = document.getElementById('btn-logout');
 const formNuevaNota = document.getElementById('form-nueva-nota');
 const listaNotasAdmin = document.getElementById('lista-notas-admin');
+const formTitle = document.getElementById('form-title');
+const btnSubmitForm = document.getElementById('btn-submit-form');
+const btnCancelarEdicion = document.getElementById('btn-cancelar-edicion');
+const notaIdField = document.getElementById('nota-id');
 
 let quill;
+
+// Resto del código...
+
+onAuthStateChanged(auth, async (user) => {
+    if (user) {
+        const adminsRef = collection(db, "administradores");
+        const q = query(adminsRef, where("email", "==", user.email));
+        const querySnapshot = await getDocs(q);
+
+        if (!querySnapshot.empty) {
+            loader.classList.add('hidden');
+            adminContent.classList.remove('hidden');
+            inicializarEditor();
+            cargarNotasAdmin();
+        } else {
+            alert("Acceso denegado. No eres un administrador.");
+            window.location.href = 'index.html';
+        }
+    } else {
+        window.location.href = 'index.html';
+    }
+});
+
+btnLogout.addEventListener('click', () => {
+    signOut(auth).catch((error) => console.error('Error al cerrar sesión:', error));
+});
+
 
 function inicializarEditor() {
     if (!quill) {
@@ -40,26 +70,23 @@ function inicializarEditor() {
     }
 }
 
+// ==================== FUNCIONES CRUD (Crear, Leer, Actualizar, Borrar) ====================
+
+// --- LEER (Read) ---
 async function cargarNotasAdmin() {
     if (!listaNotasAdmin) return;
-    
     listaNotasAdmin.innerHTML = '<p>Cargando notas...</p>';
     const q = query(collection(db, "notas"), orderBy("fecha", "desc"));
     const querySnapshot = await getDocs(q);
     
-    if (querySnapshot.empty) {
-        listaNotasAdmin.innerHTML = '<p>No hay notas publicadas.</p>';
-        return;
-    }
-
-    listaNotasAdmin.innerHTML = '';
+    listaNotasAdmin.innerHTML = querySnapshot.empty ? '<p>No hay notas publicadas.</p>' : '';
+    
     querySnapshot.forEach(doc => {
         const nota = doc.data();
         const notaElement = document.createElement('div');
         notaElement.classList.add('lista-notas-item');
-        if (nota.esVisible === false) {
-            notaElement.classList.add('oculta');
-        }
+        if (nota.esVisible === false) notaElement.classList.add('oculta');
+        
         notaElement.innerHTML = `
             <p>${nota.titulo}</p>
             <div class="nota-acciones">
@@ -75,89 +102,190 @@ async function cargarNotasAdmin() {
 }
 
 function agregarListenersBotonesAdmin() {
-    listaNotasAdmin.querySelectorAll('.btn-toggle-visibility').forEach(button => {
-        button.addEventListener('click', async (e) => {
-            const id = e.target.dataset.id;
-            const estadoActualVisible = e.target.textContent === 'Ocultar';
-            const docRef = doc(db, "notas", id);
-            try {
-                await updateDoc(docRef, { esVisible: !estadoActualVisible });
-                cargarNotasAdmin();
-            } catch (error) {
-                console.error("Error al cambiar la visibilidad: ", error);
-            }
-        });
-    });
-
-    listaNotasAdmin.querySelectorAll('.btn-borrar').forEach(button => {
-        button.addEventListener('click', async (e) => {
-            const id = e.target.dataset.id;
-            if (confirm("¿Estás seguro de que quieres borrar esta nota de forma permanente?")) {
-                try {
-                    await deleteDoc(doc(db, "notas", id));
-                    alert("Nota borrada con éxito.");
-                    cargarNotasAdmin();
-                } catch (error) {
-                    console.error("Error al borrar la nota: ", error);
-                    alert("No se pudo borrar la nota.");
-                }
-            }
-        });
-    });
-
-    listaNotasAdmin.querySelectorAll('.btn-editar').forEach(button => {
-        button.addEventListener('click', (e) => {
-            alert("La función de editar se implementará en el siguiente paso.");
-        });
-    });
+    listaNotasAdmin.querySelectorAll('.btn-toggle-visibility').forEach(button => 
+        button.addEventListener('click', (e) => toggleVisibilidadNota(e.target.dataset.id, e.target.textContent === 'Ocultar'))
+    );
+    listaNotasAdmin.querySelectorAll('.btn-borrar').forEach(button => 
+        button.addEventListener('click', (e) => borrarNota(e.target.dataset.id))
+    );
+    listaNotasAdmin.querySelectorAll('.btn-editar').forEach(button => 
+        button.addEventListener('click', (e) => cargarNotaEnFormulario(e.target.dataset.id))
+    );
 }
 
-onAuthStateChanged(auth, async (user) => {
-    if (user) {
-        const adminsRef = collection(db, "administradores");
-        const q = query(adminsRef, where("email", "==", user.email));
-        const querySnapshot = await getDocs(q);
-
-        if (!querySnapshot.empty) {
-            loader.classList.add('hidden');
-            adminContent.classList.remove('hidden');
-            inicializarEditor();
-            cargarNotasAdmin();
-        } else {
-            window.location.href = 'index.html';
-        }
-    } else {
-        window.location.href = 'index.html';
-    }
-});
-
-btnLogout.addEventListener('click', () => {
-    signOut(auth).catch((error) => console.error('Error al cerrar sesión:', error));
-});
-
-formNuevaNota.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const nuevaNota = {
-        titulo: document.getElementById('titulo').value,
-        cuerpo: quill.root.innerHTML,
-        tipo: document.getElementById('tipo').value,
-        prioridad: parseInt(document.getElementById('prioridad').value),
-        fecha: serverTimestamp(),
-        esVisible: true,
-        media: [{
-            tipo: "imagen",
-            url: document.getElementById('imagen-url').value,
-            alt: "Imagen de la nota: " + document.getElementById('titulo').value
-        }]
-    };
+// --- ACTUALIZAR VISIBILIDAD (Update) ---
+async function toggleVisibilidadNota(id, estadoActualVisible) {
     try {
-        await addDoc(collection(db, "notas"), nuevaNota);
-        alert("¡Nota publicada con éxito!");
-        formNuevaNota.reset();
-        quill.setText('');
+        await updateDoc(doc(db, "notas", id), { esVisible: !estadoActualVisible });
         cargarNotasAdmin();
     } catch (error) {
-        console.error("Error al guardar la nota: ", error);
-        alert("Error al publicar la nota. Revisa la consola para más detalles.");
+        console.error("Error al cambiar la visibilidad: ", error);
+    }
+}
+
+// --- BORRAR (Delete) ---
+async function borrarNota(id) {
+    if (confirm("¿Estás seguro de que quieres borrar esta nota de forma permanente?")) {
+        try {
+            await deleteDoc(doc(db, "notas", id));
+            alert("Nota borrada con éxito.");
+            cargarNotasAdmin();
+        } catch (error) {
+            console.error("Error al borrar la nota: ", error);
+            alert("No se pudo borrar la nota.");
+        }
+    }
+}
+
+// --- LÓGICA PARA CARGAR NOTA EN EL FORMULARIO (Pre-Update) ---
+async function cargarNotaEnFormulario(id) {
+    try {
+        const docRef = doc(db, "notas", id);
+        const docSnap = await getDoc(docRef);
+
+        if (docSnap.exists()) {
+            const nota = docSnap.data();
+            
+            // Llenar el formulario con los datos de la nota
+            notaIdField.value = id;
+            document.getElementById('titulo').value = nota.titulo;
+            quill.root.innerHTML = nota.cuerpo;
+            document.getElementById('tipo').value = nota.tipo;
+            document.getElementById('prioridad').value = nota.prioridad;
+
+            // Formatear y establecer la fecha
+            if (nota.fecha && nota.fecha.toDate) {
+                const fecha = nota.fecha.toDate();
+                const formattedDate = fecha.toISOString().split('T')[0]; // Formato YYYY-MM-DD
+                document.getElementById('fecha-nota').value = formattedDate;
+            }
+
+            // Cambiar la interfaz a "modo edición"
+            formTitle.textContent = 'Editando Nota';
+            btnSubmitForm.textContent = 'Actualizar Nota';
+            btnCancelarEdicion.classList.remove('hidden');
+            document.getElementById('imagen-file').required = false; // La imagen no es requerida al editar
+
+            // Mover la vista al formulario
+            window.scrollTo(0, 0);
+        } else {
+            console.error("No se encontró la nota para editar.");
+        }
+    } catch (error) {
+        console.error("Error al cargar la nota para edición: ", error);
+    }
+}
+
+// --- FUNCIÓN PARA LIMPIAR EL FORMULARIO Y SALIR DEL MODO EDICIÓN ---
+function resetearFormulario() {
+    formNuevaNota.reset();
+    quill.setText('');
+    notaIdField.value = '';
+    formTitle.textContent = 'Crear Nota';
+    btnSubmitForm.textContent = 'Publicar Nota';
+    btnCancelarEdicion.classList.add('hidden');
+    document.getElementById('imagen-file').required = true; // La imagen vuelve a ser requerida para notas nuevas
+}
+
+btnCancelarEdicion.addEventListener('click', resetearFormulario);
+
+// --- LÓGICA DEL FORMULARIO PARA CREAR Y ACTUALIZAR ---
+formNuevaNota.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const id = notaIdField.value;
+
+    if (id) {
+        // --- LÓGICA DE ACTUALIZAR (Update) ---
+        await actualizarNota(id);
+    } else {
+        // --- LÓGICA DE CREAR (Create) ---
+        await crearNuevaNota();
     }
 });
+
+async function crearNuevaNota() {
+    const archivoImagen = document.getElementById('imagen-file').files[0];
+    if (!archivoImagen) {
+        alert("Por favor, selecciona un archivo de imagen para la nueva nota.");
+        return;
+    }
+
+    btnSubmitForm.disabled = true;
+    btnSubmitForm.textContent = 'Publicando...';
+
+    try {
+        const storageRef = ref(storage, `notas/${Date.now()}-${archivoImagen.name}`);
+        await uploadBytes(storageRef, archivoImagen);
+        const imageUrl = await getDownloadURL(storageRef);
+
+        let fechaDePublicacion = document.getElementById('fecha-nota').value 
+            ? new Date(document.getElementById('fecha-nota').value + 'T12:00:00') 
+            : serverTimestamp();
+
+        const nuevaNota = {
+            titulo: document.getElementById('titulo').value,
+            cuerpo: quill.root.innerHTML,
+            tipo: document.getElementById('tipo').value,
+            prioridad: parseInt(document.getElementById('prioridad').value),
+            fecha: fechaDePublicacion,
+            esVisible: true,
+            media: [{ tipo: "imagen", url: imageUrl, alt: "Imagen de la nota: " + document.getElementById('titulo').value }]
+        };
+
+        await addDoc(collection(db, "notas"), nuevaNota);
+        alert("¡Nota publicada con éxito!");
+        resetearFormulario();
+        cargarNotasAdmin();
+
+    } catch (error) {
+        console.error("Error al guardar la nota: ", error);
+    } finally {
+        btnSubmitForm.disabled = false;
+    }
+}
+
+async function actualizarNota(id) {
+    btnSubmitForm.disabled = true;
+    btnSubmitForm.textContent = 'Actualizando...';
+
+    try {
+        const archivoImagen = document.getElementById('imagen-file').files[0];
+        let imageUrl;
+
+        // Si el usuario subió una nueva imagen, la procesamos.
+        if (archivoImagen) {
+            const storageRef = ref(storage, `notas/${Date.now()}-${archivoImagen.name}`);
+            await uploadBytes(storageRef, archivoImagen);
+            imageUrl = await getDownloadURL(storageRef);
+        }
+
+        let fechaDePublicacion = document.getElementById('fecha-nota').value
+            ? new Date(document.getElementById('fecha-nota').value + 'T12:00:00')
+            : serverTimestamp(); // Si se borra la fecha, se actualiza a la actual.
+
+        const datosActualizados = {
+            titulo: document.getElementById('titulo').value,
+            cuerpo: quill.root.innerHTML,
+            tipo: document.getElementById('tipo').value,
+            prioridad: parseInt(document.getElementById('prioridad').value),
+            fecha: fechaDePublicacion,
+        };
+
+        // Si obtuvimos una nueva URL de imagen, la añadimos a los datos a actualizar.
+        if (imageUrl) {
+            datosActualizados.media = [{ tipo: "imagen", url: imageUrl, alt: "Imagen de la nota: " + datosActualizados.titulo }];
+        }
+
+        const docRef = doc(db, "notas", id);
+        await updateDoc(docRef, datosActualizados);
+
+        alert("¡Nota actualizada con éxito!");
+        resetearFormulario();
+        cargarNotasAdmin();
+
+    } catch (error) {
+        console.error("Error al actualizar la nota: ", error);
+    } finally {
+        btnSubmitForm.disabled = false;
+    }
+}

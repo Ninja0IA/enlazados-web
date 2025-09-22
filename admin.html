@@ -15,6 +15,8 @@
         #editor-cuerpo { height: 250px; }
         button { padding: 0.75rem 1.5rem; border: none; border-radius: 4px; background-color: #1D4289; color: white; font-size: 1rem; font-weight: bold; cursor: pointer; transition: background-color 0.2s; }
         button:hover { background-color: #69B3E7; }
+        #btn-cancelar-edicion { background-color: #6c757d; margin-left: 10px; }
+        .form-acciones { display: flex; }
         .header-admin { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; padding-bottom: 1rem; margin-bottom: 2rem; }
         .gestion-notas { margin-top: 3rem; border-top: 1px solid #eee; padding-top: 2rem; }
         .lista-notas-item { display: flex; justify-content: space-between; align-items: center; padding: 1rem; border-bottom: 1px solid #eee; gap: 1rem; }
@@ -25,6 +27,7 @@
         .btn-toggle-visibility { background-color: #ffc107; color: black; }
         .btn-editar { background-color: #6c757d; }
         .btn-borrar { background-color: #dc3545; }
+        .campo-opcional-info { font-size: 0.8rem; color: #666; margin-top: 0.25rem; }
     </style>
 </head>
 <body>
@@ -35,11 +38,13 @@
 
     <div id="admin-content" class="admin-panel hidden">
         <div class="header-admin">
-            <h1>Crear / Editar Nota</h1>
+            <h1 id="form-title">Crear Nota</h1>
             <button id="btn-logout">Cerrar Sesión</button>
         </div>
         
         <form id="form-nueva-nota">
+            <input type="hidden" id="nota-id">
+
             <div class="form-campo">
                 <label for="titulo">Título de la Nota</label>
                 <input type="text" id="titulo" required>
@@ -49,8 +54,9 @@
                 <div id="editor-cuerpo"></div>
             </div>
             <div class="form-campo">
-                <label for="imagen-url">URL de la Imagen Principal</label>
-                <input type="url" id="imagen-url" placeholder="https://ejemplo.com/imagen.jpg" required>
+                <label for="imagen-file">Imagen Principal</label>
+                <input type="file" id="imagen-file" accept="image/*">
+                <p class="campo-opcional-info">Dejar en blanco si no se quiere cambiar la imagen actual al editar.</p>
             </div>
             <div class="form-campo">
                 <label for="tipo">Tipo de Nota</label>
@@ -63,14 +69,21 @@
                 <label for="prioridad">Prioridad (1 es más importante)</label>
                 <input type="number" id="prioridad" value="3" min="1" max="5" required>
             </div>
+            <div class="form-campo">
+                <label for="fecha-nota">Fecha de Publicación (Opcional)</label>
+                <input type="date" id="fecha-nota">
+                <p class="campo-opcional-info">Si se deja en blanco, se usará la fecha actual.</p>
+            </div>
             
-            <button type="submit">Publicar Nota</button>
+            <div class="form-acciones">
+                <button type="submit" id="btn-submit-form">Publicar Nota</button>
+                <button type="button" id="btn-cancelar-edicion" class="hidden">Cancelar Edición</button>
+            </div>
         </form>
 
         <section class="gestion-notas">
             <h2>Gestionar Notas Existentes</h2>
-            <div id="lista-notas-admin">
-                </div>
+            <div id="lista-notas-admin"></div>
         </section>
     </div>
 
