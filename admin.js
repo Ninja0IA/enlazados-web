@@ -1,7 +1,7 @@
 // Importamos las funciones que necesitamos de Firebase
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getFirestore, collection, addDoc, serverTimestamp, query, where, getDocs, orderBy, doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 // Tu configuración de Firebase
 const firebaseConfig = {
@@ -21,19 +21,18 @@ const db = getFirestore(app);
 
 // ==================== LÓGICA DE SEGURIDAD Y DEL PANEL ====================
 
-// Correo del administrador autorizado
 const adminEmail = "angelmaya.180204@gmail.com"; 
 
 const loader = document.getElementById('loader');
 const adminContent = document.getElementById('admin-content');
 const btnLogout = document.getElementById('btn-logout');
 const formNuevaNota = document.getElementById('form-nueva-nota');
+const listaNotasAdmin = document.getElementById('lista-notas-admin');
 
-let quill; // Hacemos Quill accesible globalmente en este script
+let quill;
 
-// Función para inicializar el editor de texto
 function inicializarEditor() {
-    if (!quill) { // Solo inicializa si no ha sido ya creado
+    if (!quill) {
         quill = new Quill('#editor-cuerpo', {
             theme: 'snow',
             placeholder: 'Escribe aquí el contenido detallado de la noticia...'
@@ -41,51 +40,122 @@ function inicializarEditor() {
     }
 }
 
-// Verifica el estado del usuario al cargar la página
-onAuthStateChanged(auth, (user) => {
-    if (user && user.email === adminEmail) {
-        console.log("Acceso de administrador concedido a:", user.email);
-        loader.classList.add('hidden');
-        adminContent.classList.remove('hidden');
-        inicializarEditor();
+async function cargarNotasAdmin() {
+    if (!listaNotasAdmin) return;
+    
+    listaNotasAdmin.innerHTML = '<p>Cargando notas...</p>';
+    const q = query(collection(db, "notas"), orderBy("fecha", "desc"));
+    const querySnapshot = await getDocs(q);
+    
+    if (querySnapshot.empty) {
+        listaNotasAdmin.innerHTML = '<p>No hay notas publicadas.</p>';
+        return;
+    }
+
+    listaNotasAdmin.innerHTML = '';
+    querySnapshot.forEach(doc => {
+        const nota = doc.data();
+        const notaElement = document.createElement('div');
+        notaElement.classList.add('lista-notas-item');
+        if (nota.esVisible === false) {
+            notaElement.classList.add('oculta');
+        }
+        notaElement.innerHTML = `
+            <p>${nota.titulo}</p>
+            <div class="nota-acciones">
+                <button class="btn-toggle-visibility" data-id="${doc.id}">${nota.esVisible ? 'Ocultar' : 'Mostrar'}</button>
+                <button class="btn-editar" data-id="${doc.id}">Editar</button>
+                <button class="btn-borrar" data-id="${doc.id}">Borrar</button>
+            </div>
+        `;
+        listaNotasAdmin.appendChild(notaElement);
+    });
+
+    agregarListenersBotonesAdmin();
+}
+
+function agregarListenersBotonesAdmin() {
+    listaNotasAdmin.querySelectorAll('.btn-toggle-visibility').forEach(button => {
+        button.addEventListener('click', async (e) => {
+            const id = e.target.dataset.id;
+            const estadoActualVisible = e.target.textContent === 'Ocultar';
+            const docRef = doc(db, "notas", id);
+            try {
+                await updateDoc(docRef, { esVisible: !estadoActualVisible });
+                cargarNotasAdmin();
+            } catch (error) {
+                console.error("Error al cambiar la visibilidad: ", error);
+            }
+        });
+    });
+
+    listaNotasAdmin.querySelectorAll('.btn-borrar').forEach(button => {
+        button.addEventListener('click', async (e) => {
+            const id = e.target.dataset.id;
+            if (confirm("¿Estás seguro de que quieres borrar esta nota de forma permanente?")) {
+                try {
+                    await deleteDoc(doc(db, "notas", id));
+                    alert("Nota borrada con éxito.");
+                    cargarNotasAdmin();
+                } catch (error) {
+                    console.error("Error al borrar la nota: ", error);
+                    alert("No se pudo borrar la nota.");
+                }
+            }
+        });
+    });
+
+    listaNotasAdmin.querySelectorAll('.btn-editar').forEach(button => {
+        button.addEventListener('click', (e) => {
+            alert("La función de editar se implementará en el siguiente paso.");
+        });
+    });
+}
+
+onAuthStateChanged(auth, async (user) => {
+    if (user) {
+        const adminsRef = collection(db, "administradores");
+        const q = query(adminsRef, where("email", "==", user.email));
+        const querySnapshot = await getDocs(q);
+
+        if (!querySnapshot.empty) {
+            loader.classList.add('hidden');
+            adminContent.classList.remove('hidden');
+            inicializarEditor();
+            cargarNotasAdmin();
+        } else {
+            window.location.href = 'index.html';
+        }
     } else {
-        console.log("Acceso denegado. Redirigiendo a la página principal.");
         window.location.href = 'index.html';
     }
 });
 
-// Lógica para el botón de cerrar sesión
 btnLogout.addEventListener('click', () => {
     signOut(auth).catch((error) => console.error('Error al cerrar sesión:', error));
 });
 
-// Lógica para guardar la nueva nota en la base de datos
 formNuevaNota.addEventListener('submit', async (e) => {
     e.preventDefault();
-
-    // Recopilamos los datos del formulario
     const nuevaNota = {
         titulo: document.getElementById('titulo').value,
         cuerpo: quill.root.innerHTML,
         tipo: document.getElementById('tipo').value,
         prioridad: parseInt(document.getElementById('prioridad').value),
         fecha: serverTimestamp(),
-        media: [
-            {
-                tipo: "imagen",
-                url: document.getElementById('imagen-url').value,
-                alt: "Imagen de la nota: " + document.getElementById('titulo').value
-            }
-        ]
-        // El 'id' se generará automáticamente por Firestore
+        esVisible: true,
+        media: [{
+            tipo: "imagen",
+            url: document.getElementById('imagen-url').value,
+            alt: "Imagen de la nota: " + document.getElementById('titulo').value
+        }]
     };
-
     try {
-        const docRef = await addDoc(collection(db, "notas"), nuevaNota);
-        console.log("Nota guardada con ID: ", docRef.id);
+        await addDoc(collection(db, "notas"), nuevaNota);
         alert("¡Nota publicada con éxito!");
         formNuevaNota.reset();
         quill.setText('');
+        cargarNotasAdmin();
     } catch (error) {
         console.error("Error al guardar la nota: ", error);
         alert("Error al publicar la nota. Revisa la consola para más detalles.");

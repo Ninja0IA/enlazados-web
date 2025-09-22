@@ -1,7 +1,7 @@
 // ==================== 1. INICIALIZACIÓN DE FIREBASE ====================
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { getFirestore, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getFirestore, collection, getDocs, query, orderBy, where } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyDU90OB9I5nqJ3BrOXXU84NPWKwGoZpUqI",
@@ -53,13 +53,16 @@ document.addEventListener("DOMContentLoaded", function() {
     const frases = [ "El único modo de hacer un gran trabajo es amar lo que haces.", "La vida es como una bicicleta, para mantener el equilibrio debes seguir moviéndote.", "El éxito no es la clave de la felicidad. La felicidad es la clave del éxito.", "The future belongs to those who believe in the beauty of their dreams.", "The only impossible journey is the one you never begin.", "Believe you can and you're halfway there.", "七転び八起き (Nanakorobi yaoki) - Cae siete veces, levántate ocho.", "継続は力なり (Keizoku wa chikara nari) - La perseverancia es poder.", "明日は明日の風が吹く (Ashita wa ashita no kaze ga fuku) - Mañana soplará el viento de mañana." ];
     const fraseAleatoria = frases[Math.floor(Math.random() * frases.length)];
     fraseElemento.textContent = `"${fraseAleatoria}"`;
-    welcomeModal.classList.remove('hidden');
+    if (sessionStorage.getItem('welcomeModalShown') !== 'true') {
+        welcomeModal.classList.remove('hidden');
+        sessionStorage.setItem('welcomeModalShown', 'true');
+    }
 
     /* --- CARGA DE NOTAS DESDE FIREBASE --- */
     async function cargarNotasDesdeFirestore() {
         if (!seccionDestacada || !seccionGrid || !loader) return;
         try {
-            const q = query(collection(db, "notas"), orderBy("prioridad"), orderBy("fecha", "desc"));
+            const q = query(collection(db, "notas"), where("esVisible", "==", true), orderBy("prioridad"), orderBy("fecha", "desc"));
             const querySnapshot = await getDocs(q);
             todasLasNotas = [];
             querySnapshot.forEach((doc) => {
@@ -172,7 +175,30 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     function renderizarSeccionComentarios() {
-        // ... (Esta función necesita ser completada con la lógica de Firebase para leer y escribir comentarios)
+        const interactionContainer = document.createElement('div');
+        interactionContainer.className = 'interaccion-seccion';
+        const starSVG = `<svg viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>`;
+        let formularioComentariosHTML = '';
+        if (auth.currentUser) {
+            formularioComentariosHTML = `<h3>Deja tu comentario</h3><form class="comentario-form" id="form-comentario"><textarea placeholder="Escribe tu comentario aquí..." required></textarea><button type="submit">Enviar Comentario</button></form>`;
+        } else {
+            formularioComentariosHTML = `<div class="login-wall"><p>Debes iniciar sesión para poder puntuar o dejar un comentario.</p><button id="btn-login-popup">Iniciar Sesión / Registrarse</button></div>`;
+        }
+        interactionContainer.innerHTML = `<div class="puntuacion-seccion"><h3>¡Puntúa esta nota!</h3><div class="estrellas" id="estrellas-rating">${starSVG.repeat(5)}</div></div><div class="comentarios-seccion">${formularioComentariosHTML}<h3>Comentarios</h3><div class="lista-comentarios"><div class="comentario-item"><div class="avatar">U</div><div class="comentario-contenido"><p class="autor">Usuario de Ejemplo</p><p class="fecha">Hace 2 días</p><p>¡Qué gran artículo! Muy informativo y bien escrito.</p></div></div><div class="comentario-item"><div class="avatar">L</div><div class="comentario-contenido"><p class="autor">Lector Anónimo</p><p class="fecha">Hace 1 día</p><p>No estoy de acuerdo con el segundo párrafo, pero el resto del análisis es excelente.</p></div></div></div></div>`;
+        articleContent.appendChild(interactionContainer);
+        
+        const btnLoginPopup = interactionContainer.querySelector('#btn-login-popup');
+        if (btnLoginPopup) { btnLoginPopup.addEventListener('click', iniciarSesionConGoogle); }
+        
+        const formComentario = interactionContainer.querySelector('#form-comentario');
+        if (formComentario) { formComentario.addEventListener('submit', function(e) { e.preventDefault(); alert('¡Gracias! Tu comentario ha sido enviado (simulación).'); this.reset(); }); }
+        
+        interactionContainer.querySelectorAll('.estrellas svg').forEach(estrella => {
+            estrella.addEventListener('click', function() {
+                if (!auth.currentUser) { iniciarSesionConGoogle(); } 
+                else { alert('¡Gracias por tu puntuación! (simulación)'); }
+            });
+        });
     }
     
     function calcularTiempoLectura(texto) {
@@ -210,15 +236,22 @@ document.addEventListener("DOMContentLoaded", function() {
         if (user) {
             signOut(auth);
         } else {
-            regresarAPaginaPrincipal(); // Cierra el menú y resetea la vista
+            // CAMBIO: Lógica para cerrar el menú antes de abrir el modal
+            menuLateral.classList.remove('visible');
+            barraTitulo.classList.remove('desplazado');
+            mainView.classList.remove('desplazado');
+            footer.classList.remove('desplazado');
             welcomeModal.classList.remove('hidden');
         }
     });
 
     // --- LÓGICA DEL MODAL ---
-    btnAnonimo.addEventListener('click', () => welcomeModal.classList.add('hidden'));
+    function cerrarWelcomeModal() {
+        if (welcomeModal) welcomeModal.classList.add('hidden');
+    }
+    btnAnonimo.addEventListener('click', cerrarWelcomeModal);
     btnLoginWelcome.addEventListener('click', iniciarSesionConGoogle);
-    welcomeModalCloseBtn.addEventListener('click', () => welcomeModal.classList.add('hidden'));
+    welcomeModalCloseBtn.addEventListener('click', cerrarWelcomeModal);
 
     // --- LÓGICA DEL BOTÓN "VOLVER ARRIBA" ---
     window.addEventListener("scroll", function() {
