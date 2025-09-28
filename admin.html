@@ -69,6 +69,17 @@
                 <label for="prioridad">Prioridad (1 es más importante)</label>
                 <input type="number" id="prioridad" value="3" min="1" max="5" required>
             </div>
+            
+            <div class="form-campo">
+                <label for="turno-destacada">Turno (si es destacada)</label>
+                <select id="turno-destacada">
+                    <option value="siempre">Siempre Visible</option>
+                    <option value="mañana">Mañana (5:00 - 13:59)</option>
+                    <option value="tarde">Tarde (14:00 - 21:59)</option>
+                    <option value="noche">Noche (22:00 - 4:59)</option>
+                </select>
+                <p class="campo-opcional-info">Aplica solo a notas de tipo "Destacada".</p>
+            </div>
             <div class="form-campo">
                 <label for="fecha-nota">Fecha de Publicación (Opcional)</label>
                 <input type="date" id="fecha-nota">

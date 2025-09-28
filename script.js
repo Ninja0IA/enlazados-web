@@ -24,8 +24,6 @@ document.addEventListener("DOMContentLoaded", function() {
     const btnVolver = document.getElementById("btn-volver");
     const fechaElemento = document.querySelector(".fecha");
     const fraseElemento = document.querySelector(".frase");
-    const seccionDestacada = document.querySelector(".seccion-destacada");
-    const seccionGrid = document.querySelector(".seccion-grid");
     const loader = document.getElementById("loader");
     const btnMenu = document.getElementById("btn-menu");
     const menuLateral = document.getElementById("menu-lateral");
@@ -48,7 +46,14 @@ document.addEventListener("DOMContentLoaded", function() {
 
     /* --- CARGA DE NOTAS DESDE FIREBASE --- */
     async function cargarNotasDesdeFirestore() {
-        if (!seccionDestacada || !seccionGrid || !loader) return;
+        // ===== INICIO DE CÓDIGO MODIFICADO =====
+        // Referencias a los nuevos contenedores del index.html
+        const seccionDestacada = document.getElementById("seccion-destacada-dinamica");
+        const seccionGridArriba = document.getElementById("seccion-grid-arriba");
+        const seccionGridAbajo = document.getElementById("seccion-grid-abajo");
+        // ===== FIN DE CÓDIGO MODIFICADO =====
+
+        if (!seccionDestacada || !seccionGridArriba || !seccionGridAbajo || !loader) return;
         try {
             const q = query(collection(db, "notas"), where("esVisible", "==", true), orderBy("prioridad"), orderBy("fecha", "desc"));
             const querySnapshot = await getDocs(q);
@@ -58,8 +63,11 @@ document.addEventListener("DOMContentLoaded", function() {
             });
             if (todasLasNotas.length === 0) {
                 mensajeSinNotas.classList.remove('hidden');
+                // ===== INICIO DE CÓDIGO MODIFICADO =====
                 seccionDestacada.innerHTML = '';
-                seccionGrid.innerHTML = '';
+                seccionGridArriba.innerHTML = '';
+                seccionGridAbajo.innerHTML = '';
+                // ===== FIN DE CÓDIGO MODIFICADO =====
             } else {
                 mensajeSinNotas.classList.add('hidden');
                 renderizarPaginaPrincipal();
@@ -83,13 +91,54 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     /* --- FUNCIONES DE RENDERIZADO --- */
+    // ===== ESTA FUNCIÓN HA SIDO COMPLETAMENTE REEMPLAZADA =====
     function renderizarPaginaPrincipal() {
-        const notaDestacada = todasLasNotas.find(nota => nota.tipo === 'destacada');
-        const notasGrid = todasLasNotas.filter(nota => nota.tipo === 'grid');
+        // Referencias a los nuevos contenedores
+        const seccionDestacada = document.getElementById("seccion-destacada-dinamica");
+        const seccionGridArriba = document.getElementById("seccion-grid-arriba");
+        const seccionGridAbajo = document.getElementById("seccion-grid-abajo");
+    
+        // Limpiamos los contenedores
         seccionDestacada.innerHTML = '';
-        seccionGrid.innerHTML = '';
-        if (notaDestacada) { seccionDestacada.appendChild(crearTarjeta(notaDestacada)); }
-        notasGrid.forEach(nota => { seccionGrid.appendChild(crearTarjeta(nota)); });
+        seccionGridArriba.innerHTML = '';
+        seccionGridAbajo.innerHTML = '';
+    
+        // LÓGICA DE TIEMPO para determinar el turno actual
+        const horaActual = new Date().getHours();
+        let turnoActual;
+    
+        if (horaActual >= 5 && horaActual < 14) {
+            turnoActual = 'mañana';
+        } else if (horaActual >= 14 && horaActual < 22) {
+            turnoActual = 'tarde';
+        } else {
+            turnoActual = 'noche';
+        }
+        
+        console.log(`Hora actual: ${horaActual}, el turno seleccionado es: ${turnoActual}`); // Ayuda para depurar
+    
+        // FILTRADO DE NOTAS
+        // 1. Encontrar la nota destacada para el turno actual o una que sea para 'siempre'
+        const notaDestacada = todasLasNotas.find(nota => 
+            nota.tipo === 'destacada' && (nota.turno === turnoActual || nota.turno === 'siempre')
+        );
+        
+        // 2. Obtener todas las demás notas (las de tipo 'grid' y las destacadas que no se seleccionaron)
+        const otrasNotas = todasLasNotas.filter(nota => !notaDestacada || nota.id !== notaDestacada.id);
+    
+        // RENDERIZADO EN LA NUEVA ESTRUCTURA
+        // 1. Renderizar la nota destacada si se encontró una
+        if (notaDestacada) {
+            seccionDestacada.appendChild(crearTarjeta(notaDestacada));
+        }
+    
+        // 2. Distribuir las notas restantes en las dos secciones de grid
+        const mitad = Math.ceil(otrasNotas.length / 2);
+        const notasArriba = otrasNotas.slice(0, mitad);
+        const notasAbajo = otrasNotas.slice(mitad);
+    
+        notasArriba.forEach(nota => seccionGridArriba.appendChild(crearTarjeta(nota)));
+        notasAbajo.forEach(nota => seccionGridAbajo.appendChild(crearTarjeta(nota)));
     }
 
     function crearTarjeta(nota) {

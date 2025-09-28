@@ -153,6 +153,8 @@ async function cargarNotaEnFormulario(id) {
             document.getElementById('imagen-url').value = nota.media && nota.media[0] ? nota.media[0].url : '';
             document.getElementById('tipo').value = nota.tipo;
             document.getElementById('prioridad').value = nota.prioridad;
+            // ===== CÓDIGO AÑADIDO =====
+            document.getElementById('turno-destacada').value = nota.turno || 'siempre'; // Asigna el turno o 'siempre' por defecto
 
             if (nota.fecha && nota.fecha.toDate) {
                 const fecha = nota.fecha.toDate();
@@ -216,6 +218,7 @@ async function crearNuevaNota() {
             cuerpo: quill.root.innerHTML,
             tipo: document.getElementById('tipo').value,
             prioridad: prioridad,
+            turno: document.getElementById('turno-destacada').value, // <-- LÍNEA MODIFICADA
             fecha: fechaDePublicacion,
             esVisible: true,
             media: [{ tipo: "imagen", url: imageUrl, alt: "Imagen de la nota" }]
@@ -252,6 +255,7 @@ async function actualizarNota(id) {
             cuerpo: quill.root.innerHTML,
             tipo: document.getElementById('tipo').value,
             prioridad: prioridad,
+            turno: document.getElementById('turno-destacada').value, // <-- LÍNEA MODIFICADA
             fecha: fechaDePublicacion,
         };
 
@@ -272,6 +276,6 @@ async function actualizarNota(id) {
         alert("No se pudo actualizar la nota. Revisa la consola.");
     } finally {
         btnSubmitForm.disabled = false;
-        resetearFormulario();
+        // La llamada redundante a resetearFormulario() ha sido eliminada.
     }
 }

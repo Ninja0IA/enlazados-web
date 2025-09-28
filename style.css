@@ -65,7 +65,7 @@ main { display: flex; flex-wrap: wrap; gap: 30px; }
 .barra-titulo.desplazado { width: calc(100% - 250px); }
 
 /* LAYOUT NOTICIAS PRINCIPAL */
-.seccion-destacada { margin-bottom: 40px; width: 100%; }
+.seccion-destacada { margin-bottom: 0; /* Ajustado para la nueva estructura */ width: 100%; }
 .articulo-destacado { display: flex; flex-direction: column; background-color: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 6px 15px rgba(0,0,0,0.08); border: 1px solid #d4eaf7; }
 .articulo-destacado .enlace-principal-tarjeta { display: flex; gap: 25px; }
 .articulo-destacado .imagen-container { flex: 1; max-height: 450px; }
@@ -176,3 +176,43 @@ main { display: flex; flex-wrap: wrap; gap: 30px; }
 #btn-login-welcome:hover { background-color: #69B3E7; }
 .btn-secundario { background-color: #eee; color: #333; }
 .btn-secundario:hover { background-color: #ddd; }
+
+/* ===== INICIO DEL CÓDIGO AÑADIDO (y corregido para el margen de la destacada) ===== */
+/* Ajustes para la nueva estructura de layout */
+#seccion-destacada-dinamica {
+    margin-top: 30px; /* Agrega margen superior para separarlo del grid de arriba */
+    margin-bottom: 30px; /* Agrega margen inferior para separarlo del grid de abajo */
+}
+
+/* =================================================================
+   ESTILOS PARA SEPARADORES DE SECCIÓN
+   ================================================================= */
+.section-header {
+    width: 100%;
+    display: flex; /* Activa Flexbox para alinear elementos */
+    align-items: center; /* Centra verticalmente el texto y las líneas */
+    gap: 20px; /* Crea un espacio entre las líneas y el texto */
+    margin-top: 40px; /* Espacio antes del separador */
+    margin-bottom: 30px; /* Espacio después del separador */
+}
+
+/* El texto del título (H2) */
+.section-header h2 {
+    font-family: 'Playfair Display', serif;
+    color: #1D4289; /* Color de acento principal */
+    font-size: 1.8rem;
+    white-space: nowrap; /* Evita que títulos largos se partan en dos líneas */
+    margin: 0;
+}
+
+/* Las líneas que van a los lados del título */
+.section-header::before,
+.section-header::after {
+    content: ''; /* Necesario para que los pseudo-elementos se muestren */
+    display: block;
+    height: 2px; /* Grosor de la línea */
+    background-color: #d4eaf7; /* Un color azul muy claro y suave */
+    width: 100%; /* Ocupa todo el espacio sobrante */
+}
+
+/* ===== FIN DEL CÓDIGO AÑADIDO ===== */
