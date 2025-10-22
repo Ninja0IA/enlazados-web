@@ -1,9 +1,13 @@
-// ==================== 1. INICIALIZACIÓN DE FIREBASE ====================
+// ========== Firebase ==========
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { getFirestore, collection, addDoc, serverTimestamp, query, where, getDocs, orderBy, doc, updateDoc, deleteDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import {
+  getFirestore, collection, getDocs, query, orderBy, where,
+  doc, addDoc, setDoc, updateDoc, deleteDoc
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import {
+  getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
-// --- Configuración del proyecto "enlazados-final" ---
 const firebaseConfig = {
   apiKey: "AIzaSyBPMTXm9oaNOvsXC4BYtVnoGj3VnCR02Yc",
   authDomain: "enlazados-final.firebaseapp.com",
@@ -14,268 +18,389 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
 const db = getFirestore(app);
+const auth = getAuth(app);
+const provider = new GoogleAuthProvider();
 
-// ==================== LÓGICA DEL PANEL DE ADMINISTRADOR ====================
-const loader = document.getElementById('loader');
-const adminContent = document.getElementById('admin-content');
-const btnLogout = document.getElementById('btn-logout');
-const formNuevaNota = document.getElementById('form-nueva-nota');
-const listaNotasAdmin = document.getElementById('lista-notas-admin');
-const formTitle = document.getElementById('form-title');
-const btnSubmitForm = document.getElementById('btn-submit-form');
-const btnCancelarEdicion = document.getElementById('btn-cancelar-edicion');
-const notaIdField = document.getElementById('nota-id');
+// ========== Estado global ==========
+let notas = [];              // todas las notas
+let notaActual = null;       // objeto nota seleccionada
+let relacionadasSel = [];    // ids seleccionados
+let usuario = null;
 
-let quill;
+// ========== Utilidades UI ==========
+const $ = (s) => document.querySelector(s);
+const $$ = (s) => document.querySelectorAll(s);
+const setText = (el, t) => { if (el) el.textContent = t; };
 
-onAuthStateChanged(auth, async (user) => {
-    const loader = document.getElementById('loader');
-    const adminContent = document.getElementById('admin-content');
-
-    if (user) {
-        // Muestra un mensaje mientras se verifica si es admin
-        loader.querySelector('h2').textContent = 'Verificando permisos de administrador...';
-        
-        const adminsRef = collection(db, "administradores");
-        const q = query(adminsRef, where("email", "==", user.email));
-        const querySnapshot = await getDocs(q);
-
-        if (!querySnapshot.empty) {
-            // ¡Éxito! El usuario es admin.
-            loader.classList.add('hidden');
-            adminContent.classList.remove('hidden');
-            inicializarEditor();
-            cargarNotasAdmin();
-        } else {
-            // El usuario está logueado pero NO es admin.
-            adminContent.classList.add('hidden');
-            loader.classList.remove('hidden');
-            loader.innerHTML = '<h2>Acceso Denegado</h2><p>No tienes los permisos necesarios para ver esta página. <a href="index.html">Volver al inicio</a>.</p>';
-        }
-    } else {
-        // El usuario no está logueado.
-        adminContent.classList.add('hidden');
-        loader.classList.remove('hidden');
-        loader.innerHTML = '<h2>Acceso Requerido</h2><p>Debes iniciar sesión como administrador para acceder. <a href="login.html">Volver al inicio e iniciar sesión</a>.</p>';
-    }
-});
-
-btnLogout.addEventListener('click', () => {
-    signOut(auth).catch((error) => console.error('Error al cerrar sesión:', error));
-});
-
-function inicializarEditor() {
-    if (!quill) {
-        quill = new Quill('#editor-cuerpo', {
-            theme: 'snow',
-            placeholder: 'Escribe aquí el contenido detallado de la noticia...'
-        });
-    }
+function toast(msg="Listo") {
+  const el = $("#toast");
+  el.textContent = msg;
+  el.classList.add("show");
+  setTimeout(()=> el.classList.remove("show"), 1800);
 }
 
-// ==================== FUNCIONES CRUD (Crear, Leer, Actualizar, Borrar) ====================
+function fraseElegante() {
+  const frases = [
+    "“Cada palabra bien elegida ilumina a quien la lee.”",
+    "“Escribir es ordenar el mundo con tinta y paciencia.”",
+    "“Una buena nota es un faro en la tormenta informativa.”",
+    "“El rigor del dato es la elegancia del periodismo.”",
+    "“Quien informa con claridad deja una huella imborrable.”"
+  ];
+  return frases[Math.floor(Math.random()*frases.length)];
+}
 
-async function cargarNotasAdmin() {
-    if (!listaNotasAdmin) return;
-    listaNotasAdmin.innerHTML = '<p>Cargando notas...</p>';
-    const q = query(collection(db, "notas"), orderBy("fecha", "desc"));
-    const querySnapshot = await getDocs(q);
-    
-    listaNotasAdmin.innerHTML = querySnapshot.empty ? '<p>No hay notas publicadas.</p>' : '';
-    
-    querySnapshot.forEach(doc => {
-        const nota = doc.data();
-        const notaElement = document.createElement('div');
-        notaElement.classList.add('lista-notas-item');
-        if (nota.esVisible === false) notaElement.classList.add('oculta');
-        
-        notaElement.innerHTML = `
-            <p>${nota.titulo}</p>
-            <div class="nota-acciones">
-                <button class="btn-toggle-visibility" data-id="${doc.id}">${nota.esVisible ? 'Ocultar' : 'Mostrar'}</button>
-                <button class="btn-editar" data-id="${doc.id}">Editar</button>
-                <button class="btn-borrar" data-id="${doc.id}">Borrar</button>
-            </div>
-        `;
-        listaNotasAdmin.appendChild(notaElement);
+function aplicarTemaGuardado() {
+  const tema = localStorage.getItem("tema") || "claro";
+  document.body.classList.toggle("modo-oscuro", tema === "oscuro");
+  const btn = $("#btn-toggle-tema");
+  if (btn) {
+    btn.textContent = tema === "oscuro" ? "☀️ Modo claro" : "🌙 Modo oscuro";
+    btn.setAttribute("aria-pressed", tema === "oscuro" ? "true" : "false");
+  }
+}
+
+// ========== Autenticación ==========
+function actualizarUIAuth(user) {
+  usuario = user || null;
+  $("#btn-login").style.display = user ? "none" : "inline-block";
+  $("#btn-logout").style.display = user ? "inline-block" : "none";
+  const info = $("#user-info");
+  if (user) {
+    info.textContent = `Conectado como ${user.email}`;
+    info.style.display = "inline-block";
+  } else {
+    info.style.display = "none";
+  }
+}
+
+$("#btn-login")?.addEventListener("click", async () => {
+  try {
+    await signInWithPopup(auth, provider);
+  } catch (e) {
+    console.error(e);
+    toast("No se pudo iniciar sesión.");
+  }
+});
+
+$("#btn-logout")?.addEventListener("click", async () => {
+  await signOut(auth);
+});
+
+onAuthStateChanged(auth, (user) => {
+  actualizarUIAuth(user);
+});
+
+// ========== Tema ==========
+aplicarTemaGuardado();
+$("#btn-toggle-tema")?.addEventListener("click", () => {
+  const actual = localStorage.getItem("tema") || "claro";
+  const nuevo = (actual === "oscuro") ? "claro" : "oscuro";
+  localStorage.setItem("tema", nuevo);
+  aplicarTemaGuardado();
+});
+
+// Frase motivacional al entrar
+setText($("#frase-motivacional"), fraseElegante());
+
+// ========== Carga de datos ==========
+async function cargarNotas() {
+  const qNotas = query(
+    collection(db, "notas"),
+    where("esVisible", "==", true),
+    orderBy("prioridad"),
+    orderBy("fecha", "desc")
+  );
+
+  const snap = await getDocs(qNotas);
+  notas = snap.docs.map(d => {
+    const data = d.data();
+    return {
+      id: d.id,
+      ...data,
+      views: typeof data.views === "number" ? data.views : 0,
+      media: Array.isArray(data.media) ? data.media : [],
+      categoria: data.categoria || data.tipo || "",
+      etiquetas: Array.isArray(data.etiquetas) ? data.etiquetas : [],
+    };
+  });
+
+  renderTabla(notas);
+  renderSugerenciasRelacionadas();
+  renderEstadisticas();
+}
+
+function renderEstadisticas() {
+  setText($("#stat-total"), String(notas.length));
+  const vistas = notas.reduce((a,n)=> a + (n.views||0), 0);
+  setText($("#stat-vistas"), String(vistas));
+  const top = [...notas].sort((a,b)=>(b.views||0)-(a.views||0))[0];
+  setText($("#stat-top"), top ? `${top.titulo} (${top.views||0} vistas)` : "—");
+}
+
+function renderTabla(lista) {
+  const tbody = $("#tbody-notas");
+  tbody.innerHTML = "";
+  const busq = ($("#buscar").value || "").toLowerCase();
+
+  lista
+    .filter(n => (n.titulo||"").toLowerCase().includes(busq))
+    .forEach(n => {
+      const tr = document.createElement("tr");
+
+      const problemas = diagnosticarNota(n);
+      const estado = problemas.length
+        ? `<span class="badge warn">${problemas.length} alertas</span>`
+        : `<span class="badge ok">OK</span>`;
+
+      tr.innerHTML = `
+        <td>${n.titulo || "(Sin título)"}</td>
+        <td>${n.categoria || "—"}</td>
+        <td>${n.prioridad ?? "—"}</td>
+        <td>${n.views || 0}</td>
+        <td>${n.esVisible ? "Sí" : "No"}</td>
+        <td>${estado}</td>
+        <td>
+          <button class="btn btn-editar" data-id="${n.id}">Editar</button>
+          <button class="btn btn-vis" data-id="${n.id}">${n.esVisible ? "Ocultar" : "Mostrar"}</button>
+        </td>
+      `;
+      tbody.appendChild(tr);
     });
 
-    agregarListenersBotonesAdmin();
+  // Listeners
+  $$(".btn-editar").forEach(b => b.addEventListener("click", () => editarNota(b.dataset.id)));
+  $$(".btn-vis").forEach(b => b.addEventListener("click", () => toggleVisibilidad(b.dataset.id)));
 }
 
-function agregarListenersBotonesAdmin() {
-    listaNotasAdmin.querySelectorAll('.btn-toggle-visibility').forEach(button => 
-        button.addEventListener('click', (e) => toggleVisibilidadNota(e.target.dataset.id, e.target.textContent === 'Ocultar'))
-    );
-    listaNotasAdmin.querySelectorAll('.btn-borrar').forEach(button => 
-        button.addEventListener('click', (e) => borrarNota(e.target.dataset.id))
-    );
-    listaNotasAdmin.querySelectorAll('.btn-editar').forEach(button => 
-        button.addEventListener('click', (e) => cargarNotaEnFormulario(e.target.dataset.id))
-    );
+function diagnosticarNota(n) {
+  const issues = [];
+  const textoPlano = quitarHTML(n.cuerpo || "");
+  if (!n.titulo || n.titulo.trim().length < 5) issues.push("Título muy corto o ausente.");
+  if (!textoPlano || textoPlano.trim().length < 40) issues.push("Cuerpo demasiado corto.");
+  const imagen = (n.media||[]).find(m=>m.tipo==="imagen");
+  if (!imagen || !imagen.url) issues.push("Sin imagen principal.");
+  if (!n.categoria) issues.push("Sin categoría.");
+  return issues;
 }
 
-async function toggleVisibilidadNota(id, estadoActualVisible) {
-    try {
-        await updateDoc(doc(db, "notas", id), { esVisible: !estadoActualVisible });
-        cargarNotasAdmin();
-    } catch (error) {
-        console.error("Error al cambiar la visibilidad: ", error);
-    }
+function renderSugerenciasRelacionadas() {
+  const wrap = $("#sugerencias-rel");
+  const selectHiper = $("#select-hiper");
+  wrap.innerHTML = "";
+  selectHiper.innerHTML = "<option value=''>— Selecciona una nota —</option>";
+
+  notas.forEach(n => {
+    // chips sugeridos
+    const chip = document.createElement("button");
+    chip.type = "button";
+    chip.className = "rel-chip";
+    chip.textContent = n.titulo;
+    chip.dataset.id = n.id;
+    chip.addEventListener("click", () => toggleRelacionada(n.id, n.titulo));
+    wrap.appendChild(chip);
+
+    // selector hipertexto
+    const opt = document.createElement("option");
+    opt.value = n.id;
+    opt.textContent = n.titulo;
+    selectHiper.appendChild(opt);
+  });
+
+  // refrescar selección activa
+  pintarRelacionadasSeleccionadas();
 }
 
-async function borrarNota(id) {
-    if (confirm("¿Estás seguro de que quieres borrar esta nota de forma permanente?")) {
-        try {
-            await deleteDoc(doc(db, "notas", id));
-            alert("Nota borrada con éxito.");
-            cargarNotasAdmin();
-        } catch (error) {
-            console.error("Error al borrar la nota: ", error);
-            alert("No se pudo borrar la nota.");
-        }
-    }
+function toggleRelacionada(id, titulo) {
+  const idx = relacionadasSel.indexOf(id);
+  if (idx >= 0) relacionadasSel.splice(idx, 1);
+  else if (relacionadasSel.length < 5) relacionadasSel.push(id);
+
+  pintarRelacionadasSeleccionadas();
 }
 
-async function cargarNotaEnFormulario(id) {
-    try {
-        const docRef = doc(db, "notas", id);
-        const docSnap = await getDoc(docRef);
-
-        if (docSnap.exists()) {
-            const nota = docSnap.data();
-            
-            notaIdField.value = id;
-            document.getElementById('titulo').value = nota.titulo;
-            quill.root.innerHTML = nota.cuerpo;
-            document.getElementById('imagen-url').value = nota.media && nota.media[0] ? nota.media[0].url : '';
-            document.getElementById('tipo').value = nota.tipo;
-            document.getElementById('prioridad').value = nota.prioridad;
-            // ===== CÓDIGO AÑADIDO =====
-            document.getElementById('turno-destacada').value = nota.turno || 'siempre'; // Asigna el turno o 'siempre' por defecto
-
-            if (nota.fecha && nota.fecha.toDate) {
-                const fecha = nota.fecha.toDate();
-                const formattedDate = fecha.toISOString().split('T')[0];
-                document.getElementById('fecha-nota').value = formattedDate;
-            }
-
-            formTitle.textContent = 'Editando Nota';
-            btnSubmitForm.textContent = 'Actualizar Nota';
-            btnCancelarEdicion.classList.remove('hidden');
-
-            window.scrollTo(0, 0);
-        }
-    } catch (error) {
-        console.error("Error al cargar la nota para edición: ", error);
-    }
+function pintarRelacionadasSeleccionadas() {
+  // chips activas
+  $$(".rel-chip").forEach(ch => {
+    if (relacionadasSel.includes(ch.dataset.id)) ch.classList.add("activa");
+    else ch.classList.remove("activa");
+  });
+  // lista visible
+  const cont = $("#rel-seleccionadas");
+  cont.innerHTML = "";
+  relacionadasSel.forEach(id => {
+    const n = notas.find(x=>x.id===id);
+    const span = document.createElement("span");
+    span.className = "chip";
+    span.textContent = n ? n.titulo : id;
+    cont.appendChild(span);
+  });
 }
 
-function resetearFormulario() {
-    formNuevaNota.reset();
-    quill.setText('');
-    notaIdField.value = '';
-    formTitle.textContent = 'Crear Nota';
-    btnSubmitForm.textContent = 'Publicar Nota';
-    btnCancelarEdicion.classList.add('hidden');
+// ========== Nueva / Editar ==========
+function limpiarFormulario() {
+  $("#nota-id").value = "";
+  $("#titulo").value = "";
+  $("#categoria").value = "";
+  $("#etiquetas").value = "";
+  $("#prioridad").value = 5;
+  $("#imagen-url").value = "";
+  $("#imagen-alt").value = "";
+  $("#es-visible").checked = true;
+  $("#cuerpo").value = "";
+
+  relacionadasSel = [];
+  pintarRelacionadasSeleccionadas();
+
+  setText($("#frase-motivacional"), fraseElegante());
+  notaActual = null;
 }
 
-btnCancelarEdicion.addEventListener('click', resetearFormulario);
+async function editarNota(id) {
+  const n = notas.find(x=>x.id===id);
+  if (!n) return;
+  notaActual = n;
 
-formNuevaNota.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const id = notaIdField.value;
+  $("#nota-id").value = n.id;
+  $("#titulo").value = n.titulo || "";
+  $("#categoria").value = n.categoria || "";
+  $("#etiquetas").value = (n.etiquetas || []).join(", ");
+  $("#prioridad").value = n.prioridad ?? 5;
 
-    if (id) {
-        await actualizarNota(id);
-    } else {
-        await crearNuevaNota();
-    }
+  const img = (n.media || []).find(m=>m.tipo==="imagen") || {url:"", alt:""};
+  $("#imagen-url").value = img.url || "";
+  $("#imagen-alt").value = img.alt || "";
+
+  $("#es-visible").checked = !!n.esVisible;
+  $("#cuerpo").value = n.cuerpo || "";
+
+  relacionadasSel = Array.isArray(n.relacionadas) ? [...n.relacionadas].slice(0,5) : [];
+  pintarRelacionadasSeleccionadas();
+
+  setText($("#frase-motivacional"), fraseElegante());
+  toast("Nota cargada para edición.");
+}
+
+async function toggleVisibilidad(id) {
+  const n = notas.find(x=>x.id===id);
+  if (!n) return;
+  const nuevo = !n.esVisible;
+  await updateDoc(doc(db, "notas", id), { esVisible: nuevo });
+  toast(nuevo ? "Nota visible" : "Nota oculta");
+  await cargarNotas();
+}
+
+// Insertar hipertexto en el cursor del textarea
+$("#btn-insertar-enlace")?.addEventListener("click", () => {
+  const id = $("#select-hiper").value;
+  if (!id) return;
+  const nota = notas.find(n => n.id === id);
+  if (!nota) return;
+
+  const ta = $("#cuerpo");
+  const start = ta.selectionStart;
+  const end = ta.selectionEnd;
+  const antes = ta.value.slice(0, start);
+  const despues = ta.value.slice(end);
+  const html = `<a href="#articulo/${id}">${nota.titulo}</a>`;
+  ta.value = `${antes}${html}${despues}`;
+  ta.focus();
+  ta.selectionEnd = start + html.length;
+
+  toast("Enlace insertado.");
 });
 
-async function crearNuevaNota() {
-    const imageUrl = document.getElementById('imagen-url').value;
-    if (!imageUrl) {
-        alert("Por favor, proporciona una URL para la imagen principal.");
-        return;
+// Guardar / borrar
+$("#btn-guardar")?.addEventListener("click", guardarNota);
+$("#btn-borrar")?.addEventListener("click", borrarNota);
+$("#btn-nueva")?.addEventListener("click", limpiarFormulario);
+$("#btn-refrescar")?.addEventListener("click", cargarNotas);
+$("#btn-diagnosticar")?.addEventListener("click", ejecutarDiagnostico);
+
+$("#buscar")?.addEventListener("input", () => renderTabla(notas));
+
+async function guardarNota() {
+  if (!usuario) { toast("Inicia sesión para guardar."); return; }
+
+  const id = $("#nota-id").value.trim();
+  const titulo = $("#titulo").value.trim();
+  const categoria = $("#categoria").value.trim();
+  const etiquetas = $("#etiquetas").value.split(",").map(s=>s.trim()).filter(Boolean);
+  const prioridad = Number($("#prioridad").value) || 5;
+  const url = $("#imagen-url").value.trim();
+  const alt = $("#imagen-alt").value.trim();
+  const esVisible = $("#es-visible").checked;
+  const cuerpo = $("#cuerpo").value;
+
+  const media = url ? [{ tipo:"imagen", url, alt }] : [];
+
+  const data = {
+    titulo, categoria, etiquetas, prioridad, esVisible, cuerpo, media,
+    relacionadas: relacionadasSel
+  };
+
+  try {
+    if (id) {
+      await setDoc(doc(db, "notas", id), data, { merge:true });
+      toast("Nota actualizada.");
+    } else {
+      const ref = await addDoc(collection(db, "notas"), {
+        ...data,
+        fecha: new Date(), // si no estás usando serverTimestamp
+        views: 0
+      });
+      $("#nota-id").value = ref.id;
+      toast("Nota creada.");
     }
-
-    btnSubmitForm.disabled = true;
-    btnSubmitForm.textContent = 'Publicando...';
-
-    try {
-        let fechaDePublicacion = document.getElementById('fecha-nota').value 
-            ? new Date(document.getElementById('fecha-nota').value + 'T12:00:00') 
-            : serverTimestamp();
-        
-        const prioridadValue = document.getElementById('prioridad').value;
-        const prioridad = prioridadValue ? parseInt(prioridadValue) : 3;
-
-        const nuevaNota = {
-            titulo: document.getElementById('titulo').value,
-            cuerpo: quill.root.innerHTML,
-            tipo: document.getElementById('tipo').value,
-            prioridad: prioridad,
-            turno: document.getElementById('turno-destacada').value, // <-- LÍNEA MODIFICADA
-            fecha: fechaDePublicacion,
-            esVisible: true,
-            media: [{ tipo: "imagen", url: imageUrl, alt: "Imagen de la nota" }]
-        };
-
-        await addDoc(collection(db, "notas"), nuevaNota);
-        alert("¡Nota publicada con éxito!");
-        resetearFormulario();
-        cargarNotasAdmin();
-
-    } catch (error) {
-        console.error("Error al crear la nota: ", error);
-        alert("No se pudo crear la nota. Revisa la consola.");
-    } finally {
-        btnSubmitForm.disabled = false;
-        btnSubmitForm.textContent = 'Publicar Nota';
-    }
+    setText($("#frase-motivacional"), fraseElegante());
+    await cargarNotas();
+  } catch (e) {
+    console.error(e);
+    toast("Error al guardar.");
+  }
 }
 
-async function actualizarNota(id) {
-    btnSubmitForm.disabled = true;
-    btnSubmitForm.textContent = 'Actualizando...';
+async function borrarNota() {
+  if (!usuario) { toast("Inicia sesión para borrar."); return; }
+  const id = $("#nota-id").value.trim();
+  if (!id) { toast("No hay nota cargada."); return; }
+  if (!confirm("¿Seguro que quieres borrar esta nota?")) return;
 
-    try {
-        let fechaDePublicacion = document.getElementById('fecha-nota').value
-            ? new Date(document.getElementById('fecha-nota').value + 'T12:00:00')
-            : serverTimestamp();
-
-        const prioridadValue = document.getElementById('prioridad').value;
-        const prioridad = prioridadValue ? parseInt(prioridadValue) : 3;
-
-        const datosActualizados = {
-            titulo: document.getElementById('titulo').value,
-            cuerpo: quill.root.innerHTML,
-            tipo: document.getElementById('tipo').value,
-            prioridad: prioridad,
-            turno: document.getElementById('turno-destacada').value, // <-- LÍNEA MODIFICADA
-            fecha: fechaDePublicacion,
-        };
-
-        const imageUrl = document.getElementById('imagen-url').value;
-        if (imageUrl) {
-            datosActualizados.media = [{ tipo: "imagen", url: imageUrl, alt: "Imagen de la nota" }];
-        }
-
-        const docRef = doc(db, "notas", id);
-        await updateDoc(docRef, datosActualizados);
-
-        alert("¡Nota actualizada con éxito!");
-        resetearFormulario();
-        cargarNotasAdmin();
-
-    } catch (error) {
-        console.error("Error al actualizar la nota: ", error);
-        alert("No se pudo actualizar la nota. Revisa la consola.");
-    } finally {
-        btnSubmitForm.disabled = false;
-        // La llamada redundante a resetearFormulario() ha sido eliminada.
-    }
+  try {
+    await deleteDoc(doc(db, "notas", id));
+    toast("Nota borrada.");
+    limpiarFormulario();
+    await cargarNotas();
+  } catch (e) {
+    console.error(e);
+    toast("Error al borrar.");
+  }
 }
+
+// ========== Diagnóstico ==========
+function ejecutarDiagnostico() {
+  const cont = $("#diagnostico-lista");
+  if (!notas.length) { cont.textContent = "No hay notas para analizar."; return; }
+
+  const lista = document.createElement("div");
+  notas.forEach(n => {
+    const issues = diagnosticarNota(n);
+    const div = document.createElement("div");
+    const estado = issues.length ? `<span class="badge warn">${issues.length} alertas</span>` : `<span class="badge ok">OK</span>`;
+    div.innerHTML = `<p><strong>${n.titulo || "(Sin título)"}:</strong> ${estado} ${issues.length ? "— " + issues.join(" · ") : ""}</p>`;
+    lista.appendChild(div);
+  });
+
+  cont.innerHTML = "";
+  cont.appendChild(lista);
+}
+
+// ========== Helpers ==========
+function quitarHTML(html) {
+  const d = document.createElement("div"); d.innerHTML = html;
+  return d.textContent || d.innerText || "";
+}
+
+// ========== Init ==========
+cargarNotas().catch(e => console.error(e));

@@ -1,83 +1,257 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <title>ENLAZADOS - Noticias y Actualidad</title>
-    <link rel="icon" href="img/favicon.svg" type="image/svg+xml">
-    <link rel="stylesheet" href="style.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300;0,400;0,700;1,400&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+  <meta charset="UTF-8" />
+  <title>ENLAZADOS - Noticias y Actualidad</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="icon" href="img/favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300;0,400;0,700;1,400&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&display=swap" rel="stylesheet" />
+
+  <!-- ===== Tema Halloween + FIX de legibilidad en barra (modo noche y claro) ===== -->
+  <style>
+    :root { color-scheme: light dark; }
+
+    /* === Ajuste de visibilidad del botón en modo claro === */
+    body:not(.modo-oscuro) .toggle-tema {
+      background-color: #ffffff !important;
+      color: #1f2937 !important;
+      border: 1px solid #ccc !important;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    }
+    body:not(.modo-oscuro) .toggle-tema:hover {
+      background-color: #f9fafb !important;
+      filter: brightness(.97);
+    }
+
+    /* ---------- Paleta Halloween (solo en oscuro) ---------- */
+    body.modo-oscuro { background:#0a0a12; color:#f2e9e4; }
+
+    /* Contenedores principales */
+    body.modo-oscuro header,
+    body.modo-oscuro .herramientas-notas,
+    body.modo-oscuro .articulo-grid,
+    body.modo-oscuro .articulo-destacado,
+    body.modo-oscuro .articulo-completo-container,
+    body.modo-oscuro .menu-lateral {
+      background:#1a0925 !important;
+      color:#f2e9e4 !important;
+      border-color:rgba(255,117,24,0.35) !important;
+    }
+
+    /* ====== BARRA SUPERIOR: contraste mejorado ====== */
+    body.modo-oscuro .barra-titulo {
+      background: linear-gradient(180deg, #15061d 0%, #1a0925 100%) !important;
+      box-shadow: 0 2px 12px rgba(157,78,221,0.25) !important;
+      border-bottom: 1px solid rgba(255,117,24,0.35);
+    }
+    /* Título del sitio */
+    body.modo-oscuro .barra-titulo h1 {
+      color: #b3c7ff !important;            
+      text-shadow: 0 0 6px rgba(157,78,221,.35);
+    }
+    /* Fecha y frase */
+    body.modo-oscuro .barra-titulo .meta p {
+      color: #ffdf9a !important;            
+      text-shadow: 0 0 4px rgba(0,0,0,.35);
+    }
+    /* Slogan bajo la barra */
+    body.modo-oscuro #slogan {
+      color: #ffb703 !important;
+      text-shadow: 0 0 4px rgba(157,78,221,.35);
+    }
+    /* Icono hamburguesa */
+    body.modo-oscuro .menu-icon .bar { background:#ff7518; }
+
+    /* Títulos / acentos */
+    body.modo-oscuro .section-header h2,
+    body.modo-oscuro .enlace-principal-tarjeta h2,
+    body.modo-oscuro .enlace-principal-tarjeta h3,
+    body.modo-oscuro #articulo-contenido h2 {
+      color:#ff7518 !important;
+      text-shadow:0 0 8px rgba(157,78,221,0.25);
+    }
+    body.modo-oscuro a { color:#ffb703; }
+
+    /* Buscador y botones */
+    body.modo-oscuro #herramientas-notas input {
+      background:#0f1120; color:#f2e9e4; border:1px solid rgba(255,117,24,0.35);
+    }
+    body.modo-oscuro .botones-orden button {
+      background:#4c0070; border:1px solid #9d4edd;
+    }
+    body.modo-oscuro .botones-orden button:hover,
+    body.modo-oscuro .botones-orden button.activo { background:#9d4edd; }
+
+    body.modo-oscuro footer { background:#10061a !important; color:#f2e9e4 !important; }
+
+    /* Botón de tema */
+    .toggle-tema {
+      margin-left: auto;
+      display:inline-flex; align-items:center; gap:8px;
+      padding:8px 12px;
+      border:1px solid rgba(0,0,0,0.08);
+      border-radius:10px;
+      background:#ffffff;
+      cursor:pointer; font:600 .95rem/1 'Open Sans', Arial, sans-serif;
+      transition: transform .15s ease, filter .15s ease;
+    }
+    .toggle-tema:hover { transform:translateY(-1px); filter:brightness(.98); }
+    body.modo-oscuro .toggle-tema {
+      background:#1a0925; border-color:rgba(255,117,24,0.35); color:#ffb703;
+    }
+
+    /* “Más leídas” mini-cards */
+    .seccion-mas-leidas { width:100%; margin:10px 0 40px; }
+    .seccion-mas-leidas .grid-minis {
+      display:grid; grid-template-columns:repeat(auto-fit, minmax(240px,1fr)); gap:18px;
+    }
+    .seccion-mas-leidas .tarjeta-min {
+      display:grid; grid-template-columns:96px 1fr; gap:10px; align-items:center;
+      border:1px solid #d4eaf7; border-radius:10px; background:#fff;
+      padding:10px; text-decoration:none; color:inherit;
+      transition: transform .15s ease, box-shadow .2s ease;
+    }
+    .seccion-mas-leidas .tarjeta-min:hover { transform:translateY(-2px); box-shadow:0 8px 18px rgba(0,0,0,.1); }
+    .seccion-mas-leidas .tarjeta-min img { width:96px; height:72px; object-fit:cover; border-radius:8px; }
+    .seccion-mas-leidas .tarjeta-min h4 { margin:0 0 4px 0; font-size:1rem; line-height:1.2; }
+    .seccion-mas-leidas .tarjeta-min .meta-mini { font-size:.86rem; opacity:.85; }
+    body.modo-oscuro .seccion-mas-leidas .tarjeta-min { background:#10061a; border-color:rgba(255,117,24,0.35); }
+
+    /* ⚡ Efecto de tormenta */
+    #efecto-tormenta { position:fixed; inset:0; pointer-events:none; background:transparent; opacity:0; visibility:hidden; z-index:3000; }
+    #efecto-tormenta.activo { opacity:1; visibility:visible; animation:relampago 1000ms ease-in-out forwards; }
+    @keyframes relampago {
+      0%{background:transparent;}
+      10%{background:radial-gradient(ellipse at center, rgba(255,255,255,.9) 0%, rgba(157,78,221,.45) 60%, rgba(0,0,0,0) 75%);}
+      20%{background:transparent;}
+      35%{background:radial-gradient(circle at 30% 20%, rgba(255,255,255,.85) 0%, rgba(255,183,3,.4) 45%, rgba(0,0,0,0) 70%);}
+      45%{background:transparent;}
+      60%{background:radial-gradient(circle at 70% 35%, rgba(255,255,255,.9) 0%, rgba(157,78,221,.45) 50%, rgba(0,0,0,0) 75%);}
+      70%{background:transparent;}
+      100%{background:transparent;}
+    }
+
+    /* 🟠 Hipertextos */
+    #articulo-contenido .cuerpo-articulo a {
+      color:#ff7518; text-decoration:none; transition:filter .2s ease;
+    }
+    #articulo-contenido .cuerpo-articulo a:hover {
+      filter: drop-shadow(0 0 6px rgba(255,117,24,.7));
+    }
+    body.modo-oscuro #articulo-contenido .cuerpo-articulo a { color:#ffb703; }
+
+    /* 📰 Carrusel relacionadas */
+    .relacionadas-wrapper { position:relative; margin-top:20px; }
+    .relacionadas-carrusel { display:flex; gap:16px; overflow:auto; scroll-behavior:smooth; padding-bottom:6px; }
+    .relacionadas-carrusel::-webkit-scrollbar { height:8px; }
+    .relacionadas-carrusel::-webkit-scrollbar-thumb { background:#d4eaf7; border-radius:8px; }
+    body.modo-oscuro .relacionadas-carrusel::-webkit-scrollbar-thumb { background:rgba(255,117,24,0.4); }
+    .rel-card { min-width:260px; background:#fff; border:1px solid #d4eaf7; border-radius:10px; overflow:hidden; text-decoration:none; color:inherit; transition:transform .15s ease, box-shadow .2s ease; }
+    .rel-card:hover { transform:translateY(-3px); box-shadow:0 10px 18px rgba(0,0,0,.08); }
+    .rel-card img { width:100%; height:140px; object-fit:cover; }
+    .rel-card .rel-body { padding:12px; }
+    .rel-card .rel-title { font-size:1rem; margin:0 0 6px; color:#1D4289; }
+    .rel-card .rel-meta { font-size:.86rem; opacity:.8; display:flex; gap:10px; }
+    body.modo-oscuro .rel-card { background:#10061a; border-color:rgba(255,117,24,0.35); }
+    body.modo-oscuro .rel-card .rel-title { color:#ff7518; }
+
+    .rel-nav { position:absolute; top:45%; transform:translateY(-50%); width:36px; height:36px; border:none; border-radius:50%; background:#1D4289; color:#fff; cursor:pointer; display:flex; align-items:center; justify-content:center; box-shadow:0 4px 10px rgba(0,0,0,.15); }
+    .rel-prev { left:-12px; } .rel-next { right:-12px; }
+    .rel-nav:hover { filter:brightness(1.1); }
+    body.modo-oscuro .rel-nav { background:#4c0070; border:1px solid #9d4edd; }
+
+    /* 💫 Pop animación */
+    .share-icons a { display:inline-block; margin:0 6px; text-decoration:none; font-weight:700; transform-origin:center; transition:transform .12s ease; }
+    .share-icons a:hover { animation:pop 320ms cubic-bezier(.17,.67,.28,1.4); }
+    @keyframes pop {
+      0% { transform:scale(.95) rotate(0deg); }
+      50% { transform:scale(1.08) rotate(-2deg); }
+      80% { transform:scale(1.02) rotate(1deg); }
+      100%{ transform:scale(1) rotate(0deg); }
+    }
+  </style>
 </head>
+
 <body>
-    <aside class="menu-lateral" id="menu-lateral">
-        <h2>Menú</h2>
-        <nav>
-            <ul>
-                <li><a href="index.html" id="btn-inicio-menu">Inicio</a></li>
-                <li><a href="#">Notas Principales</a></li>
-                <li><a href="#">Notas Secundarias</a></li>
-                <li><a href="about.html">Sobre Nosotros</a></li>
-            </ul>
-        </nav>
-    </aside>
+  <!-- Menú lateral -->
+  <aside class="menu-lateral" id="menu-lateral">
+    <h2>Menú</h2>
+    <nav>
+      <ul>
+        <li><a href="index.html" id="btn-inicio-menu">Inicio</a></li>
+        <li><a href="#">Notas Principales</a></li>
+        <li><a href="#">Notas Secundarias</a></li>
+        <li><a href="about.html">Sobre Nosotros</a></li>
+      </ul>
+    </nav>
+  </aside>
 
-    <header>
-        <div class="barra-titulo">
-            <div class="logo-container" id="btn-menu">
-                <img src="img/Logo.jpg" alt="Logo de ENLAZADOS" class="logo-img">
-                <div class="menu-icon">
-                    <div class="bar"></div>
-                    <div class="bar"></div>
-                    <div class="bar"></div>
-                </div>
-            </div>
-            <a href="index.html" id="titulo-principal"><h1>ENLAZADOS</h1></a>
-            <div class="meta">
-                <p class="fecha"></p>
-                <p class="frase"></p>
-            </div>
-        </div>
-        <p>Enlazados: Contigo, con el sur de Tamaulipas. ☀️🌊🌴</p>
-    </header>
+  <!-- Barra superior -->
+  <header>
+    <div class="barra-titulo">
+      <div class="logo-container" id="btn-menu">
+        <img src="img/Logo.jpg" alt="Logo de ENLAZADOS" class="logo-img" />
+        <div class="menu-icon"><div class="bar"></div><div class="bar"></div><div class="bar"></div></div>
+      </div>
 
-    <main>
-        <div id="loader" class="loader-container">
-            <div class="spinner"></div>
-        </div>
-        <p id="mensaje-sin-notas" class="hidden">Aún no hay notas publicadas. ¡Vuelve pronto!</p>
+      <a href="index.html" id="titulo-principal"><h1>ENLAZADOS</h1></a>
 
-        <div class="section-header">
-            <h2>Notas Recientes</h2>
-        </div>
-        <section class="seccion-grid" id="seccion-grid-arriba"></section>
+      <div class="meta">
+        <p class="fecha"></p>
+        <p class="frase"></p>
+      </div>
 
-        <div class="section-header">
-            <h2>Destacado</h2>
-        </div>
-        <section class="seccion-destacada" id="seccion-destacada-dinamica"></section>
+      <!-- Botón de tema -->
+      <button id="btn-toggle-tema" class="toggle-tema" type="button" aria-pressed="false">🌙 Modo oscuro</button>
+    </div>
+    <p id="slogan">Enlazados: Contigo, con el sur de Tamaulipas. ☀️🌊🌴</p>
+  </header>
 
-        <div class="section-header">
-            <h2>Más Noticias</h2>
-        </div>
-        <section class="seccion-grid" id="seccion-grid-abajo"></section>
+  <!-- Overlay tormenta -->
+  <div id="efecto-tormenta" aria-hidden="true"></div>
+  <audio id="sonido-maullido" src="media/maullido.mp3" preload="auto"></audio>
 
-    </main>
+  <main>
+    <div id="herramientas-notas" class="herramientas-notas">
+      <input type="text" id="buscador-notas" placeholder="Buscar notas..." />
+      <div class="botones-orden">
+        <button data-orden="recientes">Más recientes</button>
+        <button data-orden="antiguas">Más antiguas</button>
+        <button data-orden="prioridad">Por prioridad</button>
+      </div>
+    </div>
 
-    <section id="vista-articulo" class="hidden">
-        <div class="articulo-completo-container">
-            <button id="btn-volver" class="btn-volver">← Volver a las noticias</button>
-            <div id="articulo-contenido"></div>
-        </div>
-    </section>
+    <div id="loader" class="loader-container"><div class="spinner"></div></div>
+    <p id="mensaje-sin-notas" class="hidden">Aún no hay notas publicadas. ¡Vuelve pronto!</p>
 
-    <button id="back-to-top-btn" title="Volver arriba">▲</button>
-    
-    <footer>
-        <p>&copy; 2025 ENLAZADOS. Todos los derechos reservados.</p>
-    </footer>
+    <div class="section-header"><h2>Notas Recientes</h2></div>
+    <section class="seccion-grid" id="seccion-grid-arriba"></section>
 
-    <script type="module" src="script.js"></script>
+    <div class="section-header"><h2>Destacado</h2></div>
+    <section class="seccion-destacada" id="seccion-destacada-dinamica"></section>
+
+    <div class="section-header"><h2>Más leídas</h2></div>
+    <section class="seccion-mas-leidas" id="seccion-mas-leidas"></section>
+
+    <div class="section-header"><h2>Más Noticias</h2></div>
+    <section class="seccion-grid" id="seccion-grid-abajo"></section>
+  </main>
+
+  <section id="vista-articulo" class="hidden">
+    <div class="articulo-completo-container">
+      <button id="btn-volver" class="btn-volver">← Volver a las noticias</button>
+      <div id="articulo-contenido"></div>
+    </div>
+  </section>
+
+  <button id="back-to-top-btn" title="Volver arriba">▲</button>
+
+  <footer><p>&copy; 2025 ENLAZADOS. Todos los derechos reservados.</p></footer>
+
+  <script type="module" src="script.js"></script>
 </body>
 </html>
