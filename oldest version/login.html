@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Inicio de Sesión - ENLAZADOS Admin</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <style>
+    :root {
+      --bg: #f0f2f5;
+      --fg: #1f2937;
+      --primary: #1D4289;
+      --primary-hover: #69B3E7;
+      --bg-dark: #0a0a12;
+      --fg-dark: #f2e9e4;
+      --accent: #ff7518;
+    }
+
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      font-family: 'Open Sans', system-ui, sans-serif;
+      margin: 0;
+      background-color: var(--bg);
+      color: var(--fg);
+      transition: background .3s ease, color .3s ease;
+    }
+
+    body.modo-oscuro {
+      background: var(--bg-dark);
+      color: var(--fg-dark);
+    }
+
+    .login-box {
+      text-align: center;
+      padding: 2.5rem;
+      border-radius: 10px;
+      background: white;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+      max-width: 360px;
+      transition: background .3s ease;
+    }
+
+    body.modo-oscuro .login-box {
+      background: #1a0925;
+      border: 1px solid rgba(255,117,24,.35);
+    }
+
+    h2 {
+      margin-top: 0;
+      font-family: 'Playfair Display', serif;
+    }
+
+    button {
+      font-size: 1.1rem;
+      padding: 0.8rem 1.6rem;
+      cursor: pointer;
+      background-color: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      transition: background-color 0.2s, transform 0.1s;
+    }
+
+    button:hover { background-color: var(--primary-hover); transform: translateY(-1px); }
+
+    body.modo-oscuro button {
+      background: #4c0070;
+      border: 1px solid #9d4edd;
+    }
+
+    #status {
+      margin-top: 1.2rem;
+      font-weight: bold;
+      font-size: 0.95rem;
+    }
+
+    .toggle-tema {
+      margin-top: 1.5rem;
+      background: transparent;
+      border: 1px solid #ccc;
+      color: inherit;
+      padding: 6px 10px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+
+    .toggle-tema:hover { filter: brightness(1.1); }
+  </style>
+</head>
+<body>
+  <div class="login-box">
+    <h2>Acceso al Panel de Administración</h2>
+    <p>Inicia sesión con tu cuenta de Google autorizada.</p>
+    <button id="btn-login">Iniciar Sesión con Google</button>
+    <p id="status"></p>
+    <button id="btn-toggle-tema" class="toggle-tema">🌙 Modo oscuro</button>
+  </div>
+
+  <script type="module">
+    // ==================== INICIALIZACIÓN DE FIREBASE ====================
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import {
+      getAuth, GoogleAuthProvider, signInWithPopup,
+      onAuthStateChanged, signOut, setPersistence, browserLocalPersistence
+    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+    // --- Configuración del proyecto "enlazados-final" ---
+    const firebaseConfig = {
+      apiKey: "AIzaSyBPMTXm9oaNOvsXC4BYtVnoGj3VnCR02Yc",
+      authDomain: "enlazados-final.firebaseapp.com",
+      projectId: "enlazados-final",
+      storageBucket: "enlazados-final.firebasestorage.app",
+      messagingSenderId: "1036116744539",
+      appId: "1:1036116744539:web:65f6696a4dca60e722a27e"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const provider = new GoogleAuthProvider();
+
+    const btnLogin = document.getElementById("btn-login");
+    const statusEl = document.getElementById("status");
+
+    // ==================== PERSISTENCIA DE SESIÓN ====================
+    setPersistence(auth, browserLocalPersistence)
+      .then(() => console.log("Persistencia activada"))
+      .catch((err) => console.warn("Error persistencia:", err));
+
+    // ==================== USUARIOS PERMITIDOS ====================
+    const USUARIOS_PERMITIDOS = [
+      "angelmaya.180204@gmail.com",
+      "profesor.fadycs@uat.edu.mx",
+      "editor.enlazados@gmail.com"
+    ];
+
+    // ==================== CAMBIO DE TEMA ====================
+    const btnTema = document.getElementById("btn-toggle-tema");
+    btnTema.addEventListener("click", () => {
+      document.body.classList.toggle("modo-oscuro");
+      localStorage.setItem("tema", document.body.classList.contains("modo-oscuro") ? "oscuro" : "claro");
+    });
+
+    // Aplica el tema guardado
+    if (localStorage.getItem("tema") === "oscuro") document.body.classList.add("modo-oscuro");
+
+    // ==================== AUTO LOGIN SI YA ESTÁ INICIADO ====================
+    onAuthStateChanged(auth, (user) => {
+      if (!user) return;
+      const email = (user.email || "").toLowerCase();
+      const autorizado = USUARIOS_PERMITIDOS.map(e => e.toLowerCase()).includes(email);
+      if (autorizado) {
+        window.location.href = "admin.html";
+      } else {
+        signOut(auth);
+      }
+    });
+
+    // ==================== LÓGICA DE INICIO DE SESIÓN ====================
+    btnLogin.addEventListener("click", async () => {
+      try {
+        const result = await signInWithPopup(auth, provider);
+        const user = result.user;
+        const email = (user.email || "").toLowerCase();
+        const autorizado = USUARIOS_PERMITIDOS.map(e => e.toLowerCase()).includes(email);
+
+        if (!autorizado) {
+          await signOut(auth);
+          statusEl.textContent = "Acceso denegado: usuario no autorizado.";
+          statusEl.style.color = "red";
+          return;
+        }
+
+        statusEl.textContent = "¡Éxito! Redirigiendo al panel...";
+        statusEl.style.color = "green";
+        setTimeout(() => { window.location.href = "admin.html"; }, 1200);
+
+      } catch (error) {
+        console.error("Error al iniciar sesión:", error);
+        statusEl.textContent = "Error al iniciar sesión: " + error.message;
+        statusEl.style.color = "red";
+      }
+    });
+  </script>
+</body>
+</html>

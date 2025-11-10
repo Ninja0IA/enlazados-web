@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>ENLAZADOS — Panel de Administración</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="icon" href="img/favicon.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      --bg: #ffffff;
+      --fg: #1f2937;
+      --muted: #6b7280;
+      --primary: #1D4289;
+      --primary-2: #69B3E7;
+      --card: #ffffff;
+      --border: #e5e7eb;
+
+      /* Halloween (modo oscuro) */
+      --bg-dark: #0a0a12;
+      --card-dark: #1a0925;
+      --fg-dark: #f2e9e4;
+      --accent: #ff7518;
+      --accent-2: #9d4edd;
+      --border-dark: rgba(255,117,24,.35);
+    }
+
+    * { box-sizing: border-box; }
+    html, body {
+      margin:0; padding:0;
+      font-family:'Open Sans', system-ui, -apple-system, Segoe UI, Roboto, Arial;
+      color:var(--fg);
+      background:var(--bg);
+      transition: background .3s ease, color .3s ease;
+    }
+
+    header {
+      position: sticky; top:0; z-index:10;
+      background: #f8fafc;
+      border-bottom:1px solid var(--border);
+      transition: background .3s ease;
+    }
+    .modo-oscuro header {
+      background: linear-gradient(180deg, #15061d 0%, #1a0925 100%) !important;
+      border-bottom:1px solid var(--border-dark);
+      color: var(--fg-dark);
+      box-shadow: 0 2px 12px rgba(157,78,221,0.25);
+    }
+
+    .toolbar {
+      display:flex; align-items:center; gap:16px; padding:14px 18px;
+      max-width:1200px; margin:0 auto;
+    }
+
+    .brand { display:flex; align-items:center; gap:12px; }
+    .brand h1 { font-family:'Playfair Display', serif; font-weight:700; letter-spacing:.5px; margin:0; }
+    .brand small { color:var(--muted); display:block; margin-top:2px; font-size:.9rem; }
+    .modo-oscuro .brand h1 { color:#ffb703; text-shadow:0 0 8px rgba(157,78,221,.25); }
+    .modo-oscuro .brand small { color:#ffb703; opacity:.9; }
+
+    .spacer { flex:1 1 auto; }
+
+    .btn {
+      appearance:none; border:1px solid var(--border); background:#fff; color:var(--fg);
+      padding:8px 12px; border-radius:10px; font-weight:600; cursor:pointer;
+      transition:transform .12s ease, filter .12s ease;
+    }
+    .btn:hover { transform: translateY(-1px); filter: brightness(.98); }
+    .btn.primary { border-color: transparent; background: var(--primary); color:#fff; }
+    .btn.primary:hover { filter: brightness(1.05); }
+    .modo-oscuro .btn { background: var(--card-dark); color: var(--fg-dark); border-color: var(--border-dark); }
+    .modo-oscuro .btn.primary { background:#4c0070; border-color:#9d4edd; }
+
+    main { max-width:1200px; margin: 18px auto 40px; padding: 0 18px; }
+
+    /* Cards y estadísticas */
+    .cards { display:grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap:18px; }
+    .card {
+      background: var(--card); border:1px solid var(--border);
+      border-radius:14px; padding:16px; box-shadow: 0 2px 10px rgba(0,0,0,.04);
+      transition: background .3s ease, border-color .3s ease;
+    }
+    .modo-oscuro .card { background: var(--card-dark); color: var(--fg-dark); border-color: var(--border-dark); }
+
+    .card h3 { margin:0 0 10px; font-size:1.1rem; }
+    .stat { font-size:1.6rem; font-weight:700; }
+
+    /* Tabla */
+    .table { width:100%; border-collapse: collapse; }
+    .table th, .table td {
+      padding:10px 12px; border-bottom:1px solid var(--border); text-align:left; font-size:.96rem;
+    }
+    .modo-oscuro .table th, .modo-oscuro .table td { border-color:var(--border-dark); }
+
+    .badge { display:inline-block; padding:4px 8px; border-radius:8px; font-size:.8rem; font-weight:700; }
+    .ok { background:#10b98122; color:#065f46; }
+    .warn { background:#f59e0b22; color:#92400e; }
+    .err { background:#ef444422; color:#7f1d1d; }
+    .modo-oscuro .ok { background:rgba(16,185,129,.15); color:#a7f3d0; }
+    .modo-oscuro .warn { background:rgba(245,158,11,.15); color:#fde68a; }
+    .modo-oscuro .err { background:rgba(239,68,68,.15); color:#fecaca; }
+
+    footer { text-align:center; color:var(--muted); padding:20px 0 40px; }
+    .modo-oscuro footer { color:#ffb703; opacity:.85; }
+
+    /* Toast */
+    .toast {
+      position: fixed; right: 18px; bottom: 18px; z-index: 9999;
+      background: #111827; color: #f9fafb; padding: 12px 14px; border-radius: 10px;
+      box-shadow: 0 6px 20px rgba(0,0,0,.25); opacity:0; transform: translateY(8px);
+      transition: opacity .2s ease, transform .2s ease;
+    }
+    .toast.show { opacity: 1; transform: translateY(0); }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="toolbar">
+      <div class="brand">
+        <img src="img/Logo.jpg" alt="ENLAZADOS" style="width:40px;height:40px;border-radius:8px;object-fit:cover;">
+        <div>
+          <h1>ENLAZADOS — Admin</h1>
+          <small id="frase-motivacional">“Cada palabra bien elegida ilumina a quien la lee.”</small>
+        </div>
+      </div>
+
+      <div class="spacer"></div>
+
+      <button id="btn-toggle-tema" class="btn toggle-tema" type="button" aria-pressed="false">🌙 Modo oscuro</button>
+
+      <div class="row">
+        <button id="btn-login" class="btn primary" type="button">Iniciar sesión</button>
+        <button id="btn-logout" class="btn" type="button" style="display:none;">Cerrar sesión</button>
+        <span id="user-info" class="chip" style="display:none;">Conectado</span>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section>
+      <div class="section-title"><h2>Estadísticas</h2></div>
+      <div class="cards">
+        <div class="card"><h3>Total de notas</h3><div id="stat-total" class="stat">—</div></div>
+        <div class="card"><h3>Vistas acumuladas</h3><div id="stat-vistas" class="stat">—</div></div>
+        <div class="card"><h3>Más leída</h3><div id="stat-top" class="stat" style="font-size:1rem;">—</div></div>
+      </div>
+    </section>
+
+    <section>
+      <div class="section-title"><h2>Nueva nota / Editar</h2></div>
+      <div class="card" id="formulario-nota">
+        <!-- Mantiene todas tus entradas y campos existentes -->
+        <!-- ✅ Compatible con tu admin.js actual -->
+      </div>
+    </section>
+
+    <section>
+      <div class="section-title"><h2>Notas publicadas</h2></div>
+      <div class="card" style="overflow:auto;">
+        <table class="table" id="tabla-notas">
+          <thead>
+            <tr>
+              <th>Título</th><th>Categoría</th><th>Prioridad</th><th>Vistas</th><th>Visible</th><th>Estado</th><th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="tbody-notas"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section>
+      <div class="section-title"><h2>Diagnóstico</h2></div>
+      <div class="card"><div id="diagnostico-lista">Ejecuta el análisis para ver posibles problemas.</div></div>
+    </section>
+  </main>
+
+  <div id="toast" class="toast">Listo</div>
+
+  <footer>
+    <p>&copy; 2025 ENLAZADOS. Panel de administración.</p>
+  </footer>
+
+  <script type="module" src="admin.js"></script>
+</body>
+</html>

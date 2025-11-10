@@ -94,6 +94,159 @@
 
     footer { text-align:center; color:var(--muted); padding:24px 0 40px; }
     .modo-oscuro footer { color:#ffdf9a; }
+
+/* === Créditos (Estafa Maestra style) === */
+.creditos{
+  background:#fffbea; padding:60px 20px; border-radius:14px; margin-top:48px;
+  box-shadow:0 4px 18px rgba(0,0,0,.05); text-align:center;
+}
+.creditos h2{ font-family:'Playfair Display',serif; font-size:2.2rem; color:var(--primary); margin:0 0 36px; }
+.creditos .categoria{ margin:0 0 44px; }
+.creditos .categoria h3{ font-size:1.1rem; font-weight:700; color:var(--fg); margin:0 0 18px; }
+
+/* Distribución horizontal */
+.creditos .grid-personas{
+  display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+  gap:40px; justify-items:center; align-items:start; width:100%;
+}
+
+.creditos .persona{ max-width:220px; text-align:center; }
+.creditos .avatar-creditos{
+  width:140px; height:140px; border-radius:50%; object-fit:cover; display:block;
+  box-shadow:0 10px 26px rgba(0,0,0,.18);
+  filter:sepia(.18) grayscale(.05) saturate(.95) brightness(1.02);
+  margin:0 auto 12px; transition:transform .25s, box-shadow .25s;
+}
+.creditos .persona:hover .avatar-creditos{
+  transform:translateY(-4px); box-shadow:0 16px 34px rgba(0,0,0,.28);
+}
+.creditos .persona p{ margin:0; font-weight:700; color:var(--fg); }
+
+/* Icono X/Twitter */
+.creditos .social-link{ display:inline-flex; align-items:center; gap:6px; margin-top:8px; text-decoration:none; color:var(--primary); }
+.creditos .social-link svg{ width:20px; height:20px; }
+.creditos .social-link:hover{ filter:brightness(1.25); }
+
+/* Modo oscuro consistente con ENLAZADOS */
+.modo-oscuro .creditos{ background:var(--card-dark); box-shadow:0 0 25px rgba(157,78,221,.25); }
+.modo-oscuro .creditos h2{ color:#ffb703; text-shadow:0 0 6px rgba(157,78,221,.3); }
+.modo-oscuro .categoria h3{ color:#ffdf9a; }
+.modo-oscuro .persona p{ color:var(--fg-dark); }
+.modo-oscuro .social-link{ color:#ffb703; }
+
+/* ==================== EQUIPO (estilo créditos refinado) ==================== */
+.equipo {
+  background: #fffef8;
+  padding: 80px 20px;
+  border-radius: 16px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.04);
+  margin-top: 60px;
+  text-align: center;
+}
+
+.equipo h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: 2.5rem;
+  color: var(--primary);
+  margin-bottom: 60px;
+}
+
+.equipo .grid-personas {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 60px;
+  justify-items: center;
+}
+
+.equipo .persona {
+  max-width: 240px;
+  text-align: center;
+  background: #fff;
+  padding: 30px 20px;
+  border-radius: 18px;
+  box-shadow: 0 8px 28px rgba(0,0,0,0.08);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.equipo .persona:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 16px 38px rgba(0,0,0,0.15);
+}
+
+.equipo .avatar-creditos {
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-bottom: 16px;
+  box-shadow: 0 0 28px rgba(255, 223, 128, 0.4);
+  filter: brightness(1.02) saturate(1.1);
+}
+
+.equipo .persona h3 {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--primary);
+  margin-bottom: 10px;
+}
+
+.equipo .persona p {
+  font-size: 0.95rem;
+  color: var(--fg);
+  line-height: 1.5;
+}
+
+/* === MODO OSCURO === */
+.modo-oscuro .equipo {
+  background: var(--card-dark);
+  box-shadow: 0 0 25px rgba(157,78,221,0.25);
+}
+.modo-oscuro .equipo h2 {
+  color: #ffb703;
+  text-shadow: 0 0 8px rgba(157,78,221,.3);
+}
+.modo-oscuro .persona {
+  background: #10061a;
+  box-shadow: 0 8px 28px rgba(157,78,221,0.15);
+}
+.modo-oscuro .persona h3 {
+  color: #ffb703;
+}
+.modo-oscuro .persona p {
+  color: var(--fg-dark);
+}
+
+.equipo .persona h4 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--primary);
+  margin-bottom: 8px;
+}
+
+.equipo .persona p {
+  font-size: 0.9rem;
+  color: var(--fg);
+  line-height: 1.5;
+  font-style: italic;
+  opacity: 0.9;
+  margin: 0 auto;
+  max-width: 220px;
+}
+
+/* === Centrar la última fila si tiene menos elementos === */
+.categoria .grid-personas {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  justify-content: center; /* Centra horizontalmente la última fila */
+  gap: 60px;
+  justify-items: center;
+}
+
+/* Mejora visual general */
+.categoria {
+  text-align: center;
+  margin-bottom: 60px;
+}
+
   </style>
 </head>
 
@@ -132,47 +285,95 @@
       </div>
     </section>
 
-    <section>
-      <h2>Nuestro Equipo</h2>
-      <div class="grid">
-        <div class="card team-card">
-          <div class="avatar"></div>
-          <div>
-            <strong>Redacción</strong>
-            <div class="rol">Reporteros y cronistas</div>
-            <small>Investigación, entrevistas y verificación.</small>
-          </div>
-        </div>
+<!-- ==================== SECCIÓN NUESTRO EQUIPO ==================== -->
+<section id="equipo" class="creditos equipo">
+  <h2>Nuestro Equipo</h2>
 
-        <div class="card team-card">
-          <div class="avatar"></div>
-          <div>
-            <strong>Fotografía</strong>
-            <div class="rol">Imagen y edición</div>
-            <small>Captura de momentos, edición y curaduría visual.</small>
-          </div>
-        </div>
+  <!-- ==== Categoría: Redacción ==== -->
+  <div class="categoria">
+    <h3>Redacción</h3>
+    <div class="grid-personas">
 
-        <div class="card team-card">
-          <div class="avatar"></div>
-          <div>
-            <strong>Edición</strong>
-            <div class="rol">Estilo y coherencia narrativa</div>
-            <small>Claridad, cohesión y calidad lingüística.</small>
-          </div>
-        </div>
-
-        <div class="card team-card">
-          <div class="avatar"></div>
-          <div>
-            <strong>Desarrollo</strong>
-            <div class="rol">Tecnología y producto</div>
-            <small>Interactividad, experiencia de usuario y diseño digital.</small>
-          </div>
-        </div>
+      <div class="persona">
+        <img src="https://i.imgur.com/XRTeat6.jpeg" alt="Vane Cobos" class="avatar-creditos">
+        <h4>Vane Cobos</h4>
+        <p>"La palabra correcta puede encender una revolución de ideas."</p>
       </div>
-    </section>
-  </main>
+
+      <div class="persona">
+        <img src="https://i.imgur.com/lM0BAFb.jpeg" alt="Jared Nuñez" class="avatar-creditos">
+        <h4>Jared Nuñez</h4>
+        <p>"Las historias más poderosas nacen del silencio que alguien decide romper."</p>
+      </div>
+
+      <div class="persona">
+        <img src="https://i.imgur.com/aqvSOlc.jpeg" alt="Aura Hernandez" class="avatar-creditos">
+        <h4>Aura Hernández</h4>
+        <p>"Donde otros ven caos, ella encuentra una historia que merece ser contada."</p>
+      </div>
+
+      <div class="persona">
+        <img src="https://i.imgur.com/xiQpnm7.jpeg" alt="Liz Reyes" class="avatar-creditos">
+        <h4>Liz Reyes</h4>
+        <p>"El periodismo no solo informa, también despierta conciencias y da voz a lo que importa."</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==== Categoría: Fotografía ==== -->
+  <div class="categoria">
+    <h3>Fotografía</h3>
+    <div class="grid-personas">
+      <div class="persona">
+        <img src="https://i.imgur.com/czwVGl8.jpeg" alt="Luis Gutierrez" class="avatar-creditos">
+        <h4>Luis Gutiérrez</h4>
+        <p>"Cada imagen guarda una emoción que el tiempo no puede borrar."</p>
+      </div>
+
+      <div class="persona">
+        <img src="https://i.imgur.com/8WFzbdD.jpeg" alt="Enrique Torres" class="avatar-creditos">
+        <h4>Enrique Torres</h4>
+        <p>"El lente no captura lo que ve, sino lo que el corazón logra interpretar."</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==== Categoría: Edición y Diseño ==== -->
+  <div class="categoria">
+    <h3>Edición y Diseño</h3>
+    <div class="grid-personas">
+      <div class="persona">
+        <img src="https://i.imgur.com/AKmsQrn.jpeg" alt="Miguel Hernandez" class="avatar-creditos">
+        <h4>Miguel Hernández</h4>
+        <p>"El diseño no solo se ve; se siente, se respira y transforma la idea en impacto."</p>
+      </div>
+
+      <div class="persona">
+        <img src="https://i.imgur.com/n4l3gXj.jpeg" alt="Perla Salinas" class="avatar-creditos">
+        <h4>Perla Salinas</h4>
+        <p>"La creatividad es la tinta invisible que da color a cada historia visual."</p>
+      </div>
+
+      <div class="persona">
+        <img src="https://i.imgur.com/cIB59f6.jpeg" alt="Victor Ouviert" class="avatar-creditos">
+        <h4>Víctor Ouviert</h4>
+        <p>"Cada trazo es una declaración de intención; el arte comunica lo que las palabras callan."</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==== Categoría: Desarrollo ==== -->
+  <div class="categoria">
+    <h3>Desarrollo</h3>
+    <div class="grid-personas">
+      <div class="persona">
+        <img src="https://i.imgur.com/TRQI05s.png" alt="ElChicoDBZ" class="avatar-creditos">
+        <h4>ElChicoDBZ</h4>
+        <p>"No importa cuántas veces caigas… lo importante es cuántas veces te levantas." — <em>Goku</em></p>
+      </div>
+    </div>
+  </div>
+</section>
 
   <footer><p>&copy; 2025 ENLAZADOS. Hecho con cariño por el equipo académico de FADYCS-UAT.</p></footer>
 

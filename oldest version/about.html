@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>ENLAZADOS — Sobre Nosotros</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="icon" href="img/favicon.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      --bg: #ffffff;
+      --fg: #1f2937;
+      --muted: #6b7280;
+      --primary: #1D4289;
+      --card: #ffffff;
+      --border: #e5e7eb;
+
+      /* Halloween (modo oscuro) */
+      --bg-dark: #0a0a12;
+      --card-dark: #1a0925;
+      --fg-dark: #f2e9e4;
+      --accent: #ff7518; 
+      --accent-2: #9d4edd; 
+      --border-dark: rgba(255,117,24,.35);
+    }
+
+    * { box-sizing: border-box; }
+    html, body { margin:0; padding:0; font-family:'Open Sans', system-ui; color:var(--fg); background:var(--bg); }
+
+    header {
+      position: sticky; top:0; z-index:10;
+      background:#f8fafc; border-bottom:1px solid var(--border);
+    }
+    .modo-oscuro header {
+      background: linear-gradient(180deg, #15061d 0%, #1a0925 100%);
+      border-bottom:1px solid var(--border-dark);
+      color: var(--fg-dark);
+      box-shadow: 0 2px 12px rgba(157,78,221,0.25);
+    }
+
+    .toolbar {
+      max-width:1100px; margin:0 auto; padding:14px 18px;
+      display:flex; align-items:center; gap:16px;
+    }
+    .brand { display:flex; align-items:center; gap:12px; }
+    .brand h1 { font-family:'Playfair Display', serif; margin:0; color:var(--primary); }
+    .brand small { color:var(--muted); display:block; margin-top:2px; }
+    .modo-oscuro .brand h1 { color:#b3c7ff; text-shadow:0 0 6px rgba(157,78,221,.35); }
+    .modo-oscuro .brand small { color:#ffdf9a; }
+
+    .spacer { flex:1 1 auto; }
+    .btn {
+      appearance:none; border:1px solid var(--border); background:#ffffff; color:var(--fg);
+      padding:8px 14px; border-radius:10px; font-weight:600; cursor:pointer; transition:transform .12s ease, filter .12s ease;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    .btn:hover { transform: translateY(-1px); filter: brightness(.98); }
+    .modo-oscuro .btn { background: var(--card-dark); color: var(--fg-dark); border-color: var(--border-dark); }
+    .toggle-tema { margin-left:8px; }
+
+    main { max-width:1100px; margin: 24px auto 40px; padding: 0 18px; }
+
+    .hero { text-align:center; margin-bottom:30px; }
+    .hero h2 { font-family:'Playfair Display', serif; font-size:2rem; margin:.2rem 0; color:var(--primary); }
+    .modo-oscuro .hero h2 { color:#ffb703; text-shadow:0 0 6px rgba(157,78,221,.3); }
+    .slogan { color: #374151; }
+    .modo-oscuro .slogan { color:#ffb703; text-shadow: 0 0 4px rgba(157,78,221,.35); }
+
+    h2 { font-family:'Playfair Display', serif; color:var(--primary); text-align:center; margin-top:30px; }
+    p { line-height:1.6; margin: 8px 0 16px; }
+    strong { color: var(--primary); }
+
+    .modo-oscuro h2 { color:#ffb703; text-shadow:0 0 6px rgba(157,78,221,.3); }
+    .modo-oscuro strong { color:#ffb703; }
+
+    .card {
+      background: var(--card); border:1px solid var(--border); border-radius:14px; padding:16px;
+      box-shadow: 0 2px 10px rgba(0,0,0,.04);
+    }
+    .modo-oscuro .card { background: var(--card-dark); color: var(--fg-dark); border-color: var(--border-dark); }
+
+    .grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap:18px; }
+    .team-card { display:flex; gap:12px; align-items:center; }
+    .avatar { width:56px; height:56px; border-radius:50%; background:#e5e7eb; }
+    .modo-oscuro .avatar { background:#0f1120; border:1px solid var(--border-dark); }
+    .rol { font-size:.86rem; color:var(--muted); }
+    .modo-oscuro .rol { color:#ffdf9a; opacity:.9; }
+
+    .aviso { border-left:5px solid var(--primary); padding:12px 18px; background:#f3f6fa; border-radius:10px; margin-top:24px; }
+    .modo-oscuro .aviso { border-color:#ffb703; background:#15061d; }
+
+    footer { text-align:center; color:var(--muted); padding:24px 0 40px; }
+    .modo-oscuro footer { color:#ffdf9a; }
+  </style>
+</head>
+
+<body>
+  <header>
+    <div class="toolbar">
+      <div class="brand">
+        <img src="img/Logo.jpg" alt="ENLAZADOS" style="width:40px;height:40px;border-radius:8px;object-fit:cover;">
+        <div>
+          <h1>ENLAZADOS — Sobre Nosotros</h1>
+          <small>Conoce nuestra historia y misión</small>
+        </div>
+      </div>
+
+      <div class="spacer"></div>
+      <a href="index.html" class="btn">← Volver</a>
+      <button id="btn-toggle-tema" class="btn toggle-tema" type="button" aria-pressed="false">🌙 Modo oscuro</button>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <p class="slogan">Enlazados: Contigo, con el sur de Tamaulipas. ☀️🌊🌴</p>
+    </section>
+
+    <section>
+      <h2>Nuestra Historia</h2>
+      <p><strong>ENLAZADOS</strong> nació de la pasión por contar las historias que importan en el sur de Tamaulipas. Y aunque somos un equipo de estudiantes universitarios, también somos periodistas, diseñadores y entusiastas de la comunicación comprometidos con brindar noticias veraces, relevantes y con un profundo sentido de comunidad. Desde nuestra fundación en 2025, hemos trabajado para ser un puente informativo confiable para todos los tampiqueños.</p>
+
+      <h2>Nuestra Misión</h2>
+      <p>Nuestra misión es informar con integridad, conectar a nuestra comunidad y destacar las voces y eventos que dan forma a nuestra región. Buscamos ser más que un medio de noticias; aspiramos a ser un punto de encuentro para el diálogo y el progreso local.</p>
+
+      <div class="aviso">
+        <h2>Aviso Académico</h2>
+        <p>Este portal y sus redes sociales son parte de un ejercicio académico para la clase de <em>Periodismo Digital</em> de la <strong>FADYCS-UAT</strong>. Todo el contenido aquí publicado es con fines de aprendizaje y no representa una plataforma de noticias profesional. Agradecemos su comprensión.</p>
+      </div>
+    </section>
+
+    <section>
+      <h2>Nuestro Equipo</h2>
+      <div class="grid">
+        <div class="card team-card">
+          <div class="avatar"></div>
+          <div>
+            <strong>Redacción</strong>
+            <div class="rol">Reporteros y cronistas</div>
+            <small>Investigación, entrevistas y verificación.</small>
+          </div>
+        </div>
+
+        <div class="card team-card">
+          <div class="avatar"></div>
+          <div>
+            <strong>Fotografía</strong>
+            <div class="rol">Imagen y edición</div>
+            <small>Captura de momentos, edición y curaduría visual.</small>
+          </div>
+        </div>
+
+        <div class="card team-card">
+          <div class="avatar"></div>
+          <div>
+            <strong>Edición</strong>
+            <div class="rol">Estilo y coherencia narrativa</div>
+            <small>Claridad, cohesión y calidad lingüística.</small>
+          </div>
+        </div>
+
+        <div class="card team-card">
+          <div class="avatar"></div>
+          <div>
+            <strong>Desarrollo</strong>
+            <div class="rol">Tecnología y producto</div>
+            <small>Interactividad, experiencia de usuario y diseño digital.</small>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer><p>&copy; 2025 ENLAZADOS. Hecho con cariño por el equipo académico de FADYCS-UAT.</p></footer>
+
+  <script>
+    const btn = document.getElementById('btn-toggle-tema');
+    const slogan = document.querySelector('.slogan');
+    function aplicarTema() {
+      const tema = localStorage.getItem('tema') || 'claro';
+      document.body.classList.toggle('modo-oscuro', tema === 'oscuro');
+      btn.textContent = (tema === 'oscuro') ? '☀️ Modo claro' : '🌙 Modo oscuro';
+      btn.setAttribute('aria-pressed', tema === 'oscuro' ? 'true' : 'false');
+      slogan.textContent = (tema === 'oscuro')
+        ? 'Enlazados: Contigo, con el sur de Tamaulipas. 🎃🦇⚡'
+        : 'Enlazados: Contigo, con el sur de Tamaulipas. ☀️🌊🌴';
+    }
+    aplicarTema();
+    btn.addEventListener('click', () => {
+      const actual = localStorage.getItem('tema') || 'claro';
+      const nuevo = actual === 'oscuro' ? 'claro' : 'oscuro';
+      localStorage.setItem('tema', nuevo);
+      aplicarTema();
+    });
+  </script>
+</body>
+</html>
