@@ -444,5 +444,9 @@ main { display: flex; flex-wrap: wrap; gap: 30px; }
 .modo-oscuro .social-link {
   color: #ffb703;
 }
+/* Mantener saltos de línea en el contenido de las notas */
+#articulo-contenido {
+  white-space: pre-line;
+}
 
 /* ===== FIN DEL CÓDIGO AÑADIDO ===== */
